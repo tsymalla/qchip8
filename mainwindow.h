@@ -22,8 +22,13 @@ private slots:
 
     void on_action_Load_ROM_triggered();
 
+    void onRomLoadingFailed();
+    void onRomLoaded();
+
 private:
     Ui::MainWindow *ui;
     std::unique_ptr<Chip8::CPU> _emulator;
+
+    void _connectSignals();
 };
 #endif // MAINWINDOW_H

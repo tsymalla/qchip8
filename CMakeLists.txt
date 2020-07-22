@@ -23,6 +23,7 @@ ADD_EXECUTABLE(${PROJECT_NAME}
     cpu.h
     memory.cpp
     memory.h
+    datatypes.h
 )
 
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} PRIVATE Qt5::Widgets)
