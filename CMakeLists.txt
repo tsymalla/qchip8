@@ -19,6 +19,10 @@ ADD_EXECUTABLE(${PROJECT_NAME}
     mainwindow.cpp
     mainwindow.h
     mainwindow.ui
+    cpu.cpp
+    cpu.h
+    memory.cpp
+    memory.h
 )
 
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} PRIVATE Qt5::Widgets)
