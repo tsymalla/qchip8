@@ -60,6 +60,12 @@ namespace Chip8
         return _memory[offset];
     }
 
+    Word Memory::readWord(const size_t offset) const
+    {
+        assert(offset >= 0 && offset < MEMORY_SIZE && offset + 1 < MEMORY_SIZE);
+        return _memory[offset] << 8 | _memory[offset + 1];
+    }
+
     Byte Memory::operator[](const size_t offset) const
     {
         return readByte(offset);
@@ -72,9 +78,9 @@ namespace Chip8
 
     Memory& Memory::operator=(const QByteArray &data)
     {
-        for (size_t i = ROM_START; i < static_cast<size_t>(data.size()); ++i)
+        for (size_t i = 0; i < static_cast<size_t>(data.count()); ++i)
         {
-            _memory[i] = data.at(static_cast<int>(i - ROM_START));
+            _memory[ROM_START + i] = data.at(static_cast<int>(i));
         }
 
         return *this;

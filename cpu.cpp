@@ -1,14 +1,16 @@
 #include "cpu.h"
-#include <utility>
 #include <QFile>
-#ifdef QT_DEBUG
-    #include <QDebug>
-#endif
+#include <QMutexLocker>
 
 namespace Chip8
 {
-    CPU::CPU(QString filename): _filename(std::move(filename)), _isRunning(false), _canRefreshScreen(false)
+    CPU::CPU(QString filename, QObject *parent): QObject(parent), _filename(std::move(filename)), _isRunning(false), _canRefreshScreen(false)
     {
+    }
+
+    void CPU::setROM(QString filename)
+    {
+        _filename = std::move(filename);
     }
 
     void CPU::loadROM()
@@ -16,7 +18,6 @@ namespace Chip8
         QFile fileDescriptor(_filename);
         if (!fileDescriptor.open(QIODevice::ReadOnly))
         {
-            emit romLoadingFailed();
             return;
         }
 
@@ -32,13 +33,10 @@ namespace Chip8
         _delayTimer = { 0x00 };
         _soundTimer = { 0x00 };
         _opcode = { 0x0000 };
-        _clearStack();
+        _stack.fill(0x0000);
         _stackPointer = { 0x0000 };
         _framebuffer.fill({ 0x00 });
         _keyStatus.fill({ 0x00 });
-
-        _isRunning = true;
-        emit romLoaded();
     }
 
     void CPU::reset()
@@ -48,6 +46,11 @@ namespace Chip8
 
     void CPU::run()
     {
+        QMutexLocker locker(&_mutex);
+
+        _isRunning = true;
+        _canRefreshScreen = true;
+
         while (isRunning())
         {
             _cycle();
@@ -55,10 +58,17 @@ namespace Chip8
             // if the draw flag is set, emit an signal to update the parent with the current framebuffer
             if (_canRefreshScreen)
             {
-                emit refreshScreen(_framebuffer);
                 _canRefreshScreen = false;
+                emit refreshScreen(_framebuffer);
             }
         }
+    }
+
+    void CPU::stop()
+    {
+        QMutexLocker locker(&_mutex);
+
+        _isRunning = false;
     }
 
     bool CPU::isRunning() const
@@ -66,19 +76,114 @@ namespace Chip8
         return _isRunning;
     }
 
-    void CPU::_cycle()
+    void CPU::_stepProgramCounter()
     {
-        _opcode = _memory[_programCounter] << 8 | _memory[_programCounter + 1];
-        #ifdef QT_DEBUG
-            qDebug() << _opcode;
-        #endif
+        _programCounter += 2;
     }
 
-    void CPU::_clearStack()
+    void CPU::_cycle()
     {
-        while (!_stack.empty())
+        _opcode = _memory.readWord(_programCounter);
+
+        switch (_opcode & 0xF000)
         {
-            _stack.pop();
+            case 0x0000:
+            {
+                switch (_opcode & 0x000F)
+                {
+                    case 0x0000:
+                    {
+                        _framebuffer.fill(0x00);
+                        _canRefreshScreen = true;
+                        _stepProgramCounter();
+                        break;
+                    }
+                    case 0x000E:
+                    {
+                        _programCounter = _stack[_stackPointer];
+                        --_stackPointer;
+                        _stepProgramCounter();
+                        break;
+                    }
+                }
+
+                break;
+            }
+            case 0x1000:
+            {
+                _programCounter = _opcode & 0x0FFF;
+                break;
+            }
+            case 0x2000:
+            {
+                ++_stackPointer;
+                _stack[_stackPointer] = _programCounter;
+                _programCounter = _opcode & 0x0FFF;
+                break;
+            }
+            case 0x3000:
+            {
+                const auto reg = _baseRegisters[_opcode & 0x00F0];
+                if ((_opcode & 0x00FF) == reg)
+                {
+                    _stepProgramCounter();
+                    _stepProgramCounter();
+                }
+                else
+                {
+                    _stepProgramCounter();
+                }
+
+                break;
+            }
+            case 0x4000:
+            {
+                const auto reg = _baseRegisters[_opcode & 0x00F0];
+                if ((_opcode & 0x00FF) != reg)
+                {
+                    _stepProgramCounter();
+                    _stepProgramCounter();
+                }
+                else
+                {
+                    _stepProgramCounter();
+                }
+
+                break;
+            }
+            case 0x5000:
+            {
+                const auto reg = _baseRegisters[_opcode & 0x00F0];
+                const auto reg2 = _baseRegisters[(_opcode & 0x0F00) >> 8];
+
+                if (reg != reg2)
+                {
+                    _stepProgramCounter();
+                    _stepProgramCounter();
+                }
+                else
+                {
+                    _stepProgramCounter();
+                }
+
+                break;
+            }
+            case 0x6000:
+            {
+                _baseRegisters[(_opcode & 0x0F00) >> 8] = (_opcode & 0x00F0);
+                _stepProgramCounter();
+
+                break;
+            }
+            case 0x7000:
+            {
+                _baseRegisters[(_opcode & 0x0F00) >> 8] += (_opcode & 0x00F0);
+                _stepProgramCounter();
+
+                break;
+            }
+            default:
+                break;
         }
     }
 }

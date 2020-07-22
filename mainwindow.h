@@ -2,8 +2,8 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include <memory>
-#include "cpu.h"
+#include <QThread>
+#include "emulatorworker.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -22,12 +22,12 @@ private slots:
 
     void on_action_Load_ROM_triggered();
 
-    void onRomLoadingFailed();
-    void onRomLoaded();
+    void onRefreshScreen(Chip8::FrameBuffer framebuffer);
 
 private:
     Ui::MainWindow *ui;
-    std::unique_ptr<Chip8::CPU> _emulator;
+    QThread* _emulatorThread;
+    EmulatorWorker* _emulatorWorker;
 
     void _connectSignals();
 };

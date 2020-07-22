@@ -21,9 +21,13 @@ ADD_EXECUTABLE(${PROJECT_NAME}
     mainwindow.ui
     cpu.cpp
     cpu.h
+    opcodeinterpreter.cpp
+    opcodeinterpreter.h
     memory.cpp
     memory.h
     datatypes.h
+    emulatorworker.cpp
+    emulatorworker.h
 )
 
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} PRIVATE Qt5::Widgets)

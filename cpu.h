@@ -4,7 +4,8 @@
 #include <QObject>
 #include "datatypes.h"
 #include "memory.h"
-#include <stack>
+#include "opcodeinterpreter.h"
+#include <QMutex>
 
 namespace Chip8
 {
@@ -14,23 +15,21 @@ namespace Chip8
 
         constexpr static size_t REGISTER_COUNT = 16;
         constexpr static size_t STACK_SIZE = 16;
-        constexpr static size_t DISPLAY_WIDTH = 64;
-        constexpr static size_t DISPLAY_HEIGHT = 32;
-        constexpr static size_t DISPLAY_SIZE = DISPLAY_WIDTH * DISPLAY_HEIGHT;
         constexpr static size_t KEY_COUNT = 16;
 
     public:
-        CPU(QString filename);
+        CPU(QString filename, QObject* parent = nullptr);
+        void setROM(QString filename);
         void loadROM();
 
         void reset();
         void run();
+        void stop();
         bool isRunning() const;
+        void _stepProgramCounter();
 
     signals:
-        void romLoadingFailed();
-        void romLoaded();
-        void refreshScreen(StaticByteArray<DISPLAY_SIZE>& framebuffer);
+        void refreshScreen(FrameBuffer framebuffer);
 
     private:
         QString _filename;
@@ -44,14 +43,17 @@ namespace Chip8
         Byte _delayTimer;
         Byte _soundTimer;
         Word _opcode;
-        std::stack<Word> _stack;
+        StaticWordArray<STACK_SIZE> _stack;
         Word _stackPointer;
 
-        StaticByteArray<DISPLAY_SIZE> _framebuffer;
+        FrameBuffer _framebuffer;
         StaticByteArray<KEY_COUNT> _keyStatus;
 
+        OpcodeInterpreter _opcodeInterpreter;
+
+        QMutex _mutex;
+
         void _cycle();
-        void _clearStack();
     };
 }
 

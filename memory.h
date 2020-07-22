@@ -23,6 +23,8 @@ namespace Chip8
         Byte readByte(const size_t offset) const;
         Byte& readByte(const size_t offset);
 
+        Word readWord(const size_t offset) const;
+
         Byte operator[](const size_t offset) const;
         Byte& operator[](const size_t offset);
 

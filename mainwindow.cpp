@@ -4,13 +4,29 @@
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
-      , ui(new Ui::MainWindow)
+      , ui(new Ui::MainWindow),
+      _emulatorThread(nullptr),
+      _emulatorWorker(nullptr)
 {
     ui->setupUi(this);
 }
 
 MainWindow::~MainWindow()
 {
+    if (_emulatorWorker != nullptr)
+    {
+        _emulatorWorker->stopEmulation();
+    }
+
+    if (_emulatorThread != nullptr)
+    {
+        _emulatorThread->quit();
+        _emulatorThread->wait();
+
+        delete _emulatorThread;
+        _emulatorThread = nullptr;
+    }
+
     delete ui;
 }
 
@@ -27,24 +43,36 @@ void MainWindow::on_action_Load_ROM_triggered()
         return;
     }
 
-    _emulator = std::make_unique<Chip8::CPU>(filename);
+    if (_emulatorThread == nullptr)
+    {
+        _emulatorThread = new QThread(this);
+    }
+
+    if (_emulatorWorker == nullptr)
+    {
+        _emulatorWorker = new EmulatorWorker(filename);
+    }
+    else
+    {
+        _emulatorWorker->setROM(filename);
+    }
+
+    _emulatorWorker->moveToThread(_emulatorThread);
     _connectSignals();
-    _emulator->loadROM();
+
+    _emulatorThread->start();
 }
 
-void MainWindow::onRomLoadingFailed()
+void MainWindow::onRefreshScreen(Chip8::FrameBuffer framebuffer)
 {
-    statusBar()->showMessage("Could not load ROM.");
-}
-
-void MainWindow::onRomLoaded()
-{
-    statusBar()->showMessage("ROM successfully loaded.");
-    _emulator->run();
+    QImage image((const unsigned char*)&framebuffer, Chip8::DISPLAY_WIDTH, Chip8::DISPLAY_HEIGHT, QImage::Format_Mono);
+    ui->lblImageBuffer->setPixmap(QPixmap::fromImage(image));
 }
 
 void MainWindow::_connectSignals()
 {
-    connect(_emulator.get(), &Chip8::CPU::romLoadingFailed, this, &MainWindow::onRomLoadingFailed);
-    connect(_emulator.get(), &Chip8::CPU::romLoaded, this, &MainWindow::onRomLoaded);
+    connect(_emulatorThread, &QThread::started, _emulatorWorker, &EmulatorWorker::onRunEmulation);
+    connect(_emulatorWorker, &EmulatorWorker::finishedEmulation, _emulatorThread, &QThread::quit);
+    connect(_emulatorWorker, &EmulatorWorker::finishedEmulation, _emulatorWorker, &EmulatorWorker::deleteLater);
+    connect(_emulatorWorker, &EmulatorWorker::refreshScreen, this, &MainWindow::onRefreshScreen);
 }
