@@ -22,6 +22,8 @@ namespace Chip8
     constexpr static size_t DISPLAY_HEIGHT = 32;
     constexpr static size_t DISPLAY_SIZE = DISPLAY_WIDTH * DISPLAY_HEIGHT;
 
+    constexpr static size_t SPRITE_WIDTH = 8;
+
     using FrameBuffer = StaticByteArray<DISPLAY_SIZE>;
 }
 
