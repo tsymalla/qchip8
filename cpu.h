@@ -26,7 +26,8 @@ namespace Chip8
         void run();
         void stop();
         bool isRunning() const;
-        void _stepProgramCounter();
+        void _stepProgramCounterByte();
+        void _stepProgramCounterWord();
 
     signals:
         void refreshScreen(FrameBuffer framebuffer);

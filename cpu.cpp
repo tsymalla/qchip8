@@ -2,6 +2,7 @@
 #include <QFile>
 #include <QMutexLocker>
 #include <QDebug>
+#include <QRandomGenerator>
 
 namespace Chip8
 {
@@ -77,9 +78,14 @@ namespace Chip8
         return _isRunning;
     }
 
-    void CPU::_stepProgramCounter()
+    void CPU::_stepProgramCounterByte()
     {
         _programCounter += 2;
+    }
+
+    void CPU::_stepProgramCounterWord()
+    {
+        _programCounter += 4;
     }
 
     void CPU::_cycle()
@@ -96,14 +102,14 @@ namespace Chip8
                     {
                         _framebuffer.fill(0x00);
                         _canRefreshScreen = true;
-                        _stepProgramCounter();
+                        _stepProgramCounterByte();
                         break;
                     }
                     case 0x000E:
                     {
                         _programCounter = _stack[_stackPointer];
                         --_stackPointer;
-                        _stepProgramCounter();
+                        _stepProgramCounterByte();
                         break;
                     }
                 }
@@ -124,30 +130,28 @@ namespace Chip8
             }
             case 0x3000:
             {
-                const auto reg = _baseRegisters[_opcode & 0x0F00] >> 8;
+                const auto reg = _baseRegisters[(_opcode & 0x0F00) >> 8];
                 if ((_opcode & 0x00FF) == reg)
                 {
-                    _stepProgramCounter();
-                    _stepProgramCounter();
+                    _stepProgramCounterWord();
                 }
                 else
                 {
-                    _stepProgramCounter();
+                    _stepProgramCounterByte();
                 }
 
                 break;
             }
             case 0x4000:
             {
-                const auto reg = _baseRegisters[_opcode & 0x0F00] >> 8;
+                const auto reg = _baseRegisters[(_opcode & 0x0F00) >> 8];
                 if ((_opcode & 0x00FF) != reg)
                 {
-                    _stepProgramCounter();
-                    _stepProgramCounter();
+                    _stepProgramCounterWord();
                 }
                 else
                 {
-                    _stepProgramCounter();
+                    _stepProgramCounterByte();
                 }
 
                 break;
@@ -157,14 +161,13 @@ namespace Chip8
                 const auto reg = _baseRegisters[_opcode & 0x00F0];
                 const auto reg2 = _baseRegisters[(_opcode & 0x0F00) >> 8];
 
-                if (reg != reg2)
+                if (reg == reg2)
                 {
-                    _stepProgramCounter();
-                    _stepProgramCounter();
+                    _stepProgramCounterWord();
                 }
                 else
                 {
-                    _stepProgramCounter();
+                    _stepProgramCounterByte();
                 }
 
                 break;
@@ -172,14 +175,14 @@ namespace Chip8
             case 0x6000:
             {
                 _baseRegisters[(_opcode & 0x0F00) >> 8] = (_opcode & 0x00FF);
-                _stepProgramCounter();
+                _stepProgramCounterByte();
 
                 break;
             }
             case 0x7000:
             {
                 _baseRegisters[(_opcode & 0x0F00) >> 8] += (_opcode & 0x00F0);
-                _stepProgramCounter();
+                _stepProgramCounterByte();
 
                 break;
             }
@@ -190,25 +193,29 @@ namespace Chip8
                     case 0x0000:
                     {
                         _baseRegisters[(_opcode & 0x0F00) >> 8] = _opcode & 0x00F0;
-                        _stepProgramCounter();
+                        _stepProgramCounterByte();
+
                         break;
                     }
                     case 0x0001:
                     {
                         _baseRegisters[(_opcode & 0x0F00) >> 8] = (_opcode & 0x0F00) | (_opcode & 0x00F0);
-                        _stepProgramCounter();
+                        _stepProgramCounterByte();
+
                         break;
                     }
                     case 0x0002:
                     {
                         _baseRegisters[(_opcode & 0x0F00) >> 8] = (_opcode & 0x0F00) & (_opcode & 0x00F0);
-                        _stepProgramCounter();
+                        _stepProgramCounterByte();
+
                         break;
                     }
                     case 0x0003:
                     {
                         _baseRegisters[(_opcode & 0x0F00) >> 8] = (_opcode & 0x0F00) ^ (_opcode & 0x00F0);
-                        _stepProgramCounter();
+                        _stepProgramCounterByte();
+
                         break;
                     }
                     case 0x0004:
@@ -224,7 +231,7 @@ namespace Chip8
                             _baseRegisters[0xF] = 0;
                         }
 
-                        _stepProgramCounter();
+                        _stepProgramCounterByte();
                         break;
                     }
                     case 0x0005:
@@ -233,14 +240,14 @@ namespace Chip8
 
                         if (_baseRegisters[(_opcode & 0x00F0) >> 4] > _baseRegisters[(_opcode & 0x0F00) >> 8])
                         {
-                            _baseRegisters[0xF] = 1;
+                            _baseRegisters[0xF] = 0;
                         }
                         else
                         {
-                            _baseRegisters[0xF] = 0;
+                            _baseRegisters[0xF] = 1;
                         }
 
-                        _stepProgramCounter();
+                        _stepProgramCounterByte();
                         break;
                     }
                     case 0x0006:
@@ -248,23 +255,23 @@ namespace Chip8
                         _baseRegisters[0xF] = _baseRegisters[(_opcode & 0x0F00) >> 8] & 0x01;
                         _baseRegisters[(_opcode & 0x0F00) >> 8] >>= 1;
 
-                        _stepProgramCounter();
+                        _stepProgramCounterByte();
                         break;
                     }
                     case 0x0007:
                     {
                         if (_baseRegisters[(_opcode & 0x0F00) >> 8] > _baseRegisters[(_opcode & 0x00F0) >> 4])
                         {
-                            _baseRegisters[0xF] = 1;
+                            _baseRegisters[0xF] = 0;
                         }
                         else
                         {
-                            _baseRegisters[0xF] = 0;
+                            _baseRegisters[0xF] = 1;
                         }
 
                         _baseRegisters[(_opcode & 0x0F00) >> 8] = _baseRegisters[(_opcode & 0x00F0) >> 4] - _baseRegisters[(_opcode & 0x0F00) >> 8];
 
-                        _stepProgramCounter();
+                        _stepProgramCounterByte();
                         break;
                     }
                     case 0x000E:
@@ -272,7 +279,7 @@ namespace Chip8
                         _baseRegisters[0xF] = _baseRegisters[(_opcode & 0x0F00) >> 8] >> 7;
                         _baseRegisters[(_opcode & 0x0F00) >> 8] <<= 1;
 
-                        _stepProgramCounter();
+                        _stepProgramCounterByte();
                         break;
                     }
                 }
@@ -281,12 +288,11 @@ namespace Chip8
         {
             if (_baseRegisters[(_opcode & 0x0F00) >> 8] != _baseRegisters[(_opcode & 0x00F0) >> 4])
             {
-                _stepProgramCounter();
-                _stepProgramCounter();
+                _stepProgramCounterWord();
             }
             else
             {
-                _stepProgramCounter();
+                _stepProgramCounterByte();
             }
 
             break;
@@ -294,7 +300,7 @@ namespace Chip8
         case 0xA000:
         {
             _addressRegister = _opcode & 0x0FFF;
-            _stepProgramCounter();
+            _stepProgramCounterByte();
 
             break;
         }
@@ -305,8 +311,10 @@ namespace Chip8
         }
         case 0xC000:
         {
-            // TODO
-            _stepProgramCounter();
+            auto random = static_cast<Byte>(QRandomGenerator::global()->bounded(0x00, 0xFF));
+
+            _baseRegisters[(_opcode & 0x0F00) >> 8] = random & (_opcode & 0x00FF);
+            _stepProgramCounterByte();
             break;
         }
         case 0xD000:
@@ -324,21 +332,133 @@ namespace Chip8
 
                 for (size_t vx = 0; vx < SPRITE_WIDTH; ++vx)
                 {
+                    const size_t index = (x + vx + ((y + vy) * DISPLAY_WIDTH));
                     if ((pixels & (0x80 >> vx)) != 0)
                     {
-                        _baseRegisters[0xF] = 1;
-                    }
+                        if (_framebuffer[index] == 1)
+                        {
+                            _baseRegisters[0xF] = 1;
+                        }
 
-                    _framebuffer[x + vx + ((y + vy) * DISPLAY_HEIGHT)] ^= 1;
+                        _framebuffer[index] ^= 1;
+                    }
                 }
             }
 
             _canRefreshScreen = true;
-            _stepProgramCounter();
+            _stepProgramCounterByte();
+        }
+        case 0xE000:
+        {
+            switch (_opcode & 0x00FF)
+            {
+                case 0x009E:
+                {
+                    // TODO
+                    break;
+                }
+                case 0x00A1:
+                {
+                    // TODO
+                    break;
+                }
+            }
+        }
+        case 0xF000:
+        {
+            switch (_opcode & 0x00FF)
+            {
+                case 0x0007:
+                {
+                    _baseRegisters[(_opcode & 0x0F00) >> 8] = _delayTimer;
+                    _stepProgramCounterByte();
+
+                    break;
+                }
+                case 0x000A:
+                {
+                    // TODO
+                    _stepProgramCounterByte();
+
+                    break;
+                }
+                case 0x0015:
+                {
+                    _delayTimer = _baseRegisters[(_opcode & 0x0F00) >> 8];
+                    _stepProgramCounterByte();
+
+                    break;
+                }
+                case 0x0018:
+                {
+                    // TODO
+                    _stepProgramCounterByte();
+
+                    break;
+                }
+                case 0x001E:
+                {
+                    _addressRegister = _baseRegisters[(_opcode & 0x0F00) >> 8];
+                    _stepProgramCounterByte();
+
+                    break;
+                }
+                case 0x0029:
+                {
+                    _addressRegister = _baseRegisters[(_opcode & 0x0F00) >> 8] * 5;
+                    _stepProgramCounterByte();
+
+                    break;
+                }
+                case 0x0033:
+                {
+                    const auto reg = _baseRegisters[(_opcode & 0x0F00) >> 8];
+
+                    _memory[_addressRegister] = reg / 100;
+                    _memory[_addressRegister + 1] = (reg / 10) % 10;
+                    _memory[_addressRegister + 2] = (reg % 100) % 10;
+
+                    _stepProgramCounterByte();
+                    break;
+                }
+                case 0x0055:
+                {
+                    const size_t index = (_opcode & 0x0F00) >> 8;
+                    for (size_t i = 0; i <= index; ++i)
+                    {
+                        _memory[_addressRegister + i] = _baseRegisters[i];
+                    }
+
+                    _addressRegister += index + 1;
+                    _stepProgramCounterByte();
+
+                    break;
+                }
+                case 0x0065:
+                {
+                    const size_t index = (_opcode & 0x0F00) >> 8;
+                    for (size_t i = 0; i <= index; ++i)
+                    {
+                        _baseRegisters[i] = _memory[_addressRegister + i];
+                    }
+
+                    _addressRegister += index + 1;
+                    _stepProgramCounterByte();
+
+                    break;
+                }
+            }
+
+            break;
         }
         default:
             qDebug().noquote() << "Invalid opcode: " << QString::number(_opcode, 16);
             break;
+        }
+
+        if (_delayTimer > 0)
+        {
+            --_delayTimer;
         }
     }
 }
