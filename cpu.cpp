@@ -43,8 +43,6 @@ namespace Chip8
 
     void CPU::run()
     {
-        QMutexLocker locker(&_mutex);
-
         _isRunning = true;
         _canRefreshScreen = true;
 
@@ -63,8 +61,6 @@ namespace Chip8
 
     void CPU::stop()
     {
-        QMutexLocker locker(&_mutex);
-
         _isRunning = false;
     }
 

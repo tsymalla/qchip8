@@ -2,11 +2,11 @@
 #define CPU_H
 
 #include <QObject>
+#include <QAtomicInteger>
 #include "datatypes.h"
 #include "memory.h"
 #include "registerset.h"
 #include "opcodeinterpreter.h"
-#include <QMutex>
 
 namespace Chip8
 {
@@ -31,7 +31,7 @@ namespace Chip8
 
     private:
         QString _filename;
-        bool _isRunning;
+        QAtomicInteger<bool> _isRunning;
         bool _canRefreshScreen;
 
         Memory _memory;
@@ -43,8 +43,6 @@ namespace Chip8
         StaticByteArray<KEY_COUNT> _keyStatus;
 
         OpcodeInterpreter _opcodeInterpreter;
-
-        QMutex _mutex;
 
         void _cycle();
     };
