@@ -50,13 +50,10 @@ void MainWindow::on_action_Load_ROM_triggered()
 
     if (_emulatorWorker == nullptr)
     {
-        _emulatorWorker = new EmulatorWorker(filename);
-    }
-    else
-    {
-        _emulatorWorker->setROM(filename);
+        _emulatorWorker = new EmulatorWorker();
     }
 
+    _emulatorWorker->setROM(filename);
     _emulatorWorker->moveToThread(_emulatorThread);
     _connectSignals();
 

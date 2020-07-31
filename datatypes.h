@@ -24,6 +24,10 @@ namespace Chip8
 
     constexpr static size_t SPRITE_WIDTH = 8;
 
+    constexpr static size_t REGISTER_COUNT = 16;
+    constexpr static size_t STACK_SIZE = 16;
+    constexpr static size_t KEY_COUNT = 16;
+
     using FrameBuffer = StaticByteArray<DISPLAY_SIZE>;
 }
 

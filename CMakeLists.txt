@@ -28,6 +28,8 @@ ADD_EXECUTABLE(${PROJECT_NAME}
     datatypes.h
     emulatorworker.cpp
     emulatorworker.h
+    registerset.cpp
+    registerset.h
 )
 
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} PRIVATE Qt5::Widgets)

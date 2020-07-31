@@ -9,7 +9,7 @@ class EmulatorWorker: public QObject
 {
     Q_OBJECT
 public:
-    explicit EmulatorWorker(QString filename, QObject* parent = nullptr);
+    explicit EmulatorWorker(QObject* parent = nullptr);
     void setROM(QString filename);
     void stopEmulation();
 
@@ -22,7 +22,7 @@ signals:
     void finishedEmulation();
 
 private:
-    Chip8::CPU* _emulator;
+    Chip8::CPU _emulator;
     QMutex _mutex;
 };
 

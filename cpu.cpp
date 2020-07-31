@@ -6,7 +6,7 @@
 
 namespace Chip8
 {
-    CPU::CPU(QString filename, QObject *parent): QObject(parent), _filename(std::move(filename)), _isRunning(false), _canRefreshScreen(false)
+    CPU::CPU(QObject *parent): QObject(parent), _isRunning(false), _canRefreshScreen(false)
     {
     }
 
@@ -29,14 +29,9 @@ namespace Chip8
 
         _isRunning = false;
         _canRefreshScreen = false;
-        _baseRegisters.fill(0x00);
-        _addressRegister = { 0x0000 };
+        _registerSet.reset();
         _programCounter = { 0x0200 };
-        _delayTimer = { 0x00 };
-        _soundTimer = { 0x00 };
         _opcode = { 0x0000 };
-        _stack.fill(0x0000);
-        _stackPointer = { 0x0000 };
         _framebuffer.fill({ 0x00 });
         _keyStatus.fill({ 0x00 });
     }
@@ -92,6 +87,8 @@ namespace Chip8
     {
         _opcode = _memory.readWord(_programCounter);
 
+        size_t registerIndex = (_opcode & 0x0F00) >> 8;
+
         switch (_opcode & 0xF000)
         {
             case 0x0000:
@@ -107,8 +104,7 @@ namespace Chip8
                     }
                     case 0x000E:
                     {
-                        _programCounter = _stack[_stackPointer];
-                        --_stackPointer;
+                        _programCounter = _registerSet.popStack();
                         _stepProgramCounterByte();
                         break;
                     }
@@ -123,14 +119,13 @@ namespace Chip8
             }
             case 0x2000:
             {
-                ++_stackPointer;
-                _stack[_stackPointer] = _programCounter;
+                _registerSet.pushStack(_programCounter);
                 _programCounter = _opcode & 0x0FFF;
                 break;
             }
             case 0x3000:
             {
-                const auto reg = _baseRegisters[(_opcode & 0x0F00) >> 8];
+                const auto reg = _registerSet.getRegisterValue(registerIndex);
                 if ((_opcode & 0x00FF) == reg)
                 {
                     _stepProgramCounterWord();
@@ -144,7 +139,7 @@ namespace Chip8
             }
             case 0x4000:
             {
-                const auto reg = _baseRegisters[(_opcode & 0x0F00) >> 8];
+                const auto reg = _registerSet.getRegisterValue(registerIndex);
                 if ((_opcode & 0x00FF) != reg)
                 {
                     _stepProgramCounterWord();
@@ -158,8 +153,8 @@ namespace Chip8
             }
             case 0x5000:
             {
-                const auto reg = _baseRegisters[_opcode & 0x00F0];
-                const auto reg2 = _baseRegisters[(_opcode & 0x0F00) >> 8];
+                const auto reg = _registerSet.getRegisterValue(_opcode & 0x00F0);
+                const auto reg2 = _registerSet.getRegisterValue(registerIndex);
 
                 if (reg == reg2)
                 {
@@ -174,14 +169,14 @@ namespace Chip8
             }
             case 0x6000:
             {
-                _baseRegisters[(_opcode & 0x0F00) >> 8] = (_opcode & 0x00FF);
+                _registerSet.setRegisterValue(registerIndex, (_opcode & 0x00FF));
                 _stepProgramCounterByte();
 
                 break;
             }
             case 0x7000:
             {
-                _baseRegisters[(_opcode & 0x0F00) >> 8] += (_opcode & 0x00F0);
+                _registerSet.addRegisterValue(registerIndex, (_opcode & 0x00FF));
                 _stepProgramCounterByte();
 
                 break;
@@ -192,43 +187,43 @@ namespace Chip8
                 {
                     case 0x0000:
                     {
-                        _baseRegisters[(_opcode & 0x0F00) >> 8] = _opcode & 0x00F0;
+                        _registerSet.setRegisterValue(registerIndex, (_opcode & 0x00F0));
                         _stepProgramCounterByte();
 
                         break;
                     }
                     case 0x0001:
                     {
-                        _baseRegisters[(_opcode & 0x0F00) >> 8] = (_opcode & 0x0F00) | (_opcode & 0x00F0);
+                        _registerSet.setRegisterValue(registerIndex, (_opcode & 0x0F00) | (_opcode & 0x00F0));
                         _stepProgramCounterByte();
 
                         break;
                     }
                     case 0x0002:
                     {
-                        _baseRegisters[(_opcode & 0x0F00) >> 8] = (_opcode & 0x0F00) & (_opcode & 0x00F0);
+                        _registerSet.setRegisterValue(registerIndex, (_opcode & 0x0F00) & (_opcode & 0x00F0));
                         _stepProgramCounterByte();
 
                         break;
                     }
                     case 0x0003:
                     {
-                        _baseRegisters[(_opcode & 0x0F00) >> 8] = (_opcode & 0x0F00) ^ (_opcode & 0x00F0);
+                        _registerSet.setRegisterValue(registerIndex, (_opcode & 0x0F00) ^ (_opcode & 0x00F0));
                         _stepProgramCounterByte();
 
                         break;
                     }
                     case 0x0004:
                     {
-                        _baseRegisters[(_opcode & 0x0F00) >> 8] += _baseRegisters[(_opcode & 0x00F0) >> 4];
+                        _registerSet.addRegisterValue(registerIndex, _registerSet.getRegisterValue((_opcode & 0x00F0) >> 4));
 
-                        if (_baseRegisters[(_opcode & 0x00F0) >> 4] > (0xFF - _baseRegisters[(_opcode & 0x0F00) >> 8]))
+                        if (_registerSet.getRegisterValue((_opcode & 0x00F0) >> 4) > (0xFF - _registerSet.getRegisterValue((_opcode & 0x0F00) >> 8)))
                         {
-                            _baseRegisters[0xF] = 1;
+                            _registerSet.setRegisterValue(0xF, 1);
                         }
                         else
                         {
-                            _baseRegisters[0xF] = 0;
+                            _registerSet.setRegisterValue(0xF, 0);
                         }
 
                         _stepProgramCounterByte();
@@ -236,15 +231,15 @@ namespace Chip8
                     }
                     case 0x0005:
                     {
-                        _baseRegisters[(_opcode & 0x0F00) >> 8] -= _baseRegisters[(_opcode & 0x00F0) >> 4];
+                        _registerSet.subRegisterValue(registerIndex, _registerSet.getRegisterValue((_opcode & 0x00F0) >> 4));
 
-                        if (_baseRegisters[(_opcode & 0x00F0) >> 4] > _baseRegisters[(_opcode & 0x0F00) >> 8])
+                        if (_registerSet.getRegisterValue((_opcode & 0x00F0) >> 4) > _registerSet.getRegisterValue(registerIndex))
                         {
-                            _baseRegisters[0xF] = 0;
+                            _registerSet.setRegisterValue(0xF, 0);
                         }
                         else
                         {
-                            _baseRegisters[0xF] = 1;
+                            _registerSet.setRegisterValue(0xF, 1);
                         }
 
                         _stepProgramCounterByte();
@@ -252,32 +247,32 @@ namespace Chip8
                     }
                     case 0x0006:
                     {
-                        _baseRegisters[0xF] = _baseRegisters[(_opcode & 0x0F00) >> 8] & 0x01;
-                        _baseRegisters[(_opcode & 0x0F00) >> 8] >>= 1;
+                        _registerSet.setRegisterValue(0xF, _registerSet.getRegisterValue((_opcode & 0x0F00) >> 8) & 0x01);
+                        _registerSet.shrRegisterValue(registerIndex, 1);
 
                         _stepProgramCounterByte();
                         break;
                     }
                     case 0x0007:
                     {
-                        if (_baseRegisters[(_opcode & 0x0F00) >> 8] > _baseRegisters[(_opcode & 0x00F0) >> 4])
+                        if (_registerSet.getRegisterValue(registerIndex) > _registerSet.getRegisterValue((_opcode & 0x00F0) >> 4))
                         {
-                            _baseRegisters[0xF] = 0;
+                            _registerSet.setRegisterValue(0xF, 0);
                         }
                         else
                         {
-                            _baseRegisters[0xF] = 1;
+                            _registerSet.setRegisterValue(0xF, 1);
                         }
 
-                        _baseRegisters[(_opcode & 0x0F00) >> 8] = _baseRegisters[(_opcode & 0x00F0) >> 4] - _baseRegisters[(_opcode & 0x0F00) >> 8];
+                        _registerSet.setRegisterValue(registerIndex, _registerSet.getRegisterValue((_opcode & 0x00F0) >> 4) - _registerSet.getRegisterValue((_opcode & 0x0F00) >> 8));
 
                         _stepProgramCounterByte();
                         break;
                     }
                     case 0x000E:
                     {
-                        _baseRegisters[0xF] = _baseRegisters[(_opcode & 0x0F00) >> 8] >> 7;
-                        _baseRegisters[(_opcode & 0x0F00) >> 8] <<= 1;
+                        _registerSet.setRegisterValue(0xF, _registerSet.getRegisterValue((_opcode & 0x0F00) >> 8) >> 7);
+                        _registerSet.shlRegisterValue(registerIndex, 1);
 
                         _stepProgramCounterByte();
                         break;
@@ -286,7 +281,7 @@ namespace Chip8
             }
         case 0x9000:
         {
-            if (_baseRegisters[(_opcode & 0x0F00) >> 8] != _baseRegisters[(_opcode & 0x00F0) >> 4])
+            if (_registerSet.getRegisterValue(registerIndex) != _registerSet.getRegisterValue((_opcode & 0x00F0) >> 4))
             {
                 _stepProgramCounterWord();
             }
@@ -299,36 +294,37 @@ namespace Chip8
         }
         case 0xA000:
         {
-            _addressRegister = _opcode & 0x0FFF;
+            _registerSet.setAddressRegister(_opcode & 0x0FFF);
             _stepProgramCounterByte();
 
             break;
         }
         case 0xB000:
         {
-            _programCounter = (_opcode & 0x0FFF) + _baseRegisters[0];
+            _programCounter = (_opcode & 0x0FFF) + _registerSet.getRegisterValue(0);
             break;
         }
         case 0xC000:
         {
             auto random = static_cast<Byte>(QRandomGenerator::global()->bounded(0x00, 0xFF));
+            _registerSet.setRegisterValue(registerIndex, random & (_opcode & 0x00FF));
 
-            _baseRegisters[(_opcode & 0x0F00) >> 8] = random & (_opcode & 0x00FF);
             _stepProgramCounterByte();
             break;
         }
         case 0xD000:
         {
             unsigned short pixels = 0;
-            unsigned short x = _baseRegisters[(_opcode & 0x0F00) >> 8];
-            unsigned short y = _baseRegisters[(_opcode & 0x00F0) >> 4];
+            unsigned short x = _registerSet.getRegisterValue(registerIndex);
+            unsigned short y = _registerSet.getRegisterValue((_opcode & 0x00F0) >> 4);
             unsigned short height = _opcode & 0x000F;
+            auto addressRegister = _registerSet.getAddressRegister();
 
-            _baseRegisters[0xF] = 0;
+            _registerSet.setRegisterValue(0xF, 0);
 
             for (size_t vy = 0; vy < height; ++vy)
             {
-                pixels = _memory[_addressRegister + y];
+                pixels = _memory[addressRegister + y];
 
                 for (size_t vx = 0; vx < SPRITE_WIDTH; ++vx)
                 {
@@ -337,7 +333,7 @@ namespace Chip8
                     {
                         if (_framebuffer[index] == 1)
                         {
-                            _baseRegisters[0xF] = 1;
+                            _registerSet.setRegisterValue(0xF, 1);
                         }
 
                         _framebuffer[index] ^= 1;
@@ -370,7 +366,7 @@ namespace Chip8
             {
                 case 0x0007:
                 {
-                    _baseRegisters[(_opcode & 0x0F00) >> 8] = _delayTimer;
+                    _registerSet.setRegisterValue(registerIndex, _registerSet.getDelayTimer());
                     _stepProgramCounterByte();
 
                     break;
@@ -384,7 +380,7 @@ namespace Chip8
                 }
                 case 0x0015:
                 {
-                    _delayTimer = _baseRegisters[(_opcode & 0x0F00) >> 8];
+                    _registerSet.setDelayTimer(_registerSet.getRegisterValue(registerIndex));
                     _stepProgramCounterByte();
 
                     break;
@@ -398,25 +394,26 @@ namespace Chip8
                 }
                 case 0x001E:
                 {
-                    _addressRegister = _baseRegisters[(_opcode & 0x0F00) >> 8];
+                    _registerSet.setAddressRegister(_registerSet.getRegisterValue(registerIndex));
                     _stepProgramCounterByte();
 
                     break;
                 }
                 case 0x0029:
                 {
-                    _addressRegister = _baseRegisters[(_opcode & 0x0F00) >> 8] * 5;
+                    _registerSet.setAddressRegister(_registerSet.getRegisterValue(registerIndex) * 5);
                     _stepProgramCounterByte();
 
                     break;
                 }
                 case 0x0033:
                 {
-                    const auto reg = _baseRegisters[(_opcode & 0x0F00) >> 8];
+                    const auto reg = _registerSet.getRegisterValue(registerIndex);
+                    const auto addressRegister = _registerSet.getAddressRegister();
 
-                    _memory[_addressRegister] = reg / 100;
-                    _memory[_addressRegister + 1] = (reg / 10) % 10;
-                    _memory[_addressRegister + 2] = (reg % 100) % 10;
+                    _memory[addressRegister] = reg / 100;
+                    _memory[addressRegister + 1] = (reg / 10) % 10;
+                    _memory[addressRegister + 2] = (reg % 100) % 10;
 
                     _stepProgramCounterByte();
                     break;
@@ -424,12 +421,14 @@ namespace Chip8
                 case 0x0055:
                 {
                     const size_t index = (_opcode & 0x0F00) >> 8;
+                    const auto addressRegister = _registerSet.getAddressRegister();
+
                     for (size_t i = 0; i <= index; ++i)
                     {
-                        _memory[_addressRegister + i] = _baseRegisters[i];
+                        _memory[addressRegister + i] = _registerSet.getRegisterValue(i);
                     }
 
-                    _addressRegister += index + 1;
+                    _registerSet.incAddressRegister(index + 1);
                     _stepProgramCounterByte();
 
                     break;
@@ -437,12 +436,14 @@ namespace Chip8
                 case 0x0065:
                 {
                     const size_t index = (_opcode & 0x0F00) >> 8;
+                    const auto addressRegister = _registerSet.getAddressRegister();
+
                     for (size_t i = 0; i <= index; ++i)
                     {
-                        _baseRegisters[i] = _memory[_addressRegister + i];
+                        _registerSet.setRegisterValue(i, _memory[addressRegister + i]);
                     }
 
-                    _addressRegister += index + 1;
+                    _registerSet.incAddressRegister(index + 1);
                     _stepProgramCounterByte();
 
                     break;
@@ -456,9 +457,9 @@ namespace Chip8
             break;
         }
 
-        if (_delayTimer > 0)
+        if (_registerSet.getDelayTimer() > 0)
         {
-            --_delayTimer;
+            _registerSet.decDelayTimer();
         }
     }
 }

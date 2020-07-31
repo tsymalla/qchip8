@@ -4,6 +4,7 @@
 #include <QObject>
 #include "datatypes.h"
 #include "memory.h"
+#include "registerset.h"
 #include "opcodeinterpreter.h"
 #include <QMutex>
 
@@ -13,12 +14,8 @@ namespace Chip8
     {
         Q_OBJECT
 
-        constexpr static size_t REGISTER_COUNT = 16;
-        constexpr static size_t STACK_SIZE = 16;
-        constexpr static size_t KEY_COUNT = 16;
-
     public:
-        CPU(QString filename, QObject* parent = nullptr);
+        CPU(QObject* parent = nullptr);
         void setROM(QString filename);
         void loadROM();
 
@@ -38,14 +35,9 @@ namespace Chip8
         bool _canRefreshScreen;
 
         Memory _memory;
-        StaticByteArray<REGISTER_COUNT> _baseRegisters;
-        Word _addressRegister;
         Word _programCounter;
-        Byte _delayTimer;
-        Byte _soundTimer;
         Word _opcode;
-        StaticWordArray<STACK_SIZE> _stack;
-        Word _stackPointer;
+        RegisterSet _registerSet;
 
         FrameBuffer _framebuffer;
         StaticByteArray<KEY_COUNT> _keyStatus;
