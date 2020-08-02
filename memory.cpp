@@ -78,9 +78,9 @@ namespace Chip8
 
     Memory& Memory::operator=(const QByteArray &data)
     {
-        for (size_t i = 0; i < static_cast<size_t>(data.count()); ++i)
+        for (size_t i = 0; i < static_cast<size_t>(data.length()); ++i)
         {
-            _memory[ROM_START + i] = data.at(static_cast<int>(i));
+            _memory[ROM_START + i] = static_cast<Byte>(data.at(static_cast<int>(i)));
         }
 
         return *this;
