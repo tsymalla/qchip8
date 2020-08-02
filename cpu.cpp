@@ -84,7 +84,7 @@ namespace Chip8
         _opcode = _memory.readWord(_programCounter);
 
         size_t registerIndex = (_opcode & 0x0F00) >> 8;
-        qDebug() << _programCounter << " " << QString::number(_opcode, 16);
+        //qDebug() << _programCounter << " " << QString::number(_opcode, 16);
 
         switch (_opcode & 0xF000)
         {
@@ -230,8 +230,6 @@ namespace Chip8
                     }
                     case 0x0005:
                     {
-                        _registerSet.subRegisterValue(registerIndex, _registerSet.getRegisterValue(secondaryRegister));
-
                         if (_registerSet.getRegisterValue(secondaryRegister) > _registerSet.getRegisterValue(registerIndex))
                         {
                             _registerSet.setRegisterValue(0xF, 0);
@@ -240,6 +238,8 @@ namespace Chip8
                         {
                             _registerSet.setRegisterValue(0xF, 1);
                         }
+
+                        _registerSet.subRegisterValue(registerIndex, _registerSet.getRegisterValue(secondaryRegister));
 
                         _stepProgramCounterByte();
                         break;
@@ -377,7 +377,7 @@ namespace Chip8
                     case 0x000A:
                     {
                         // TODO
-                        _stepProgramCounterByte();
+                        //_stepProgramCounterByte();
 
                         break;
                     }
@@ -390,7 +390,7 @@ namespace Chip8
                     }
                     case 0x0018:
                     {
-                        // TODO
+                        _registerSet.setSoundTimer(_registerSet.getRegisterValue(registerIndex));
                         _stepProgramCounterByte();
 
                         break;
@@ -413,7 +413,7 @@ namespace Chip8
                     }
                     case 0x0029:
                     {
-                        _registerSet.setAddressRegister(_registerSet.getRegisterValue(registerIndex) * 5);
+                        _registerSet.setAddressRegister(_registerSet.getRegisterValue(registerIndex) * 0x5);
                         _stepProgramCounterByte();
 
                         break;
@@ -465,13 +465,18 @@ namespace Chip8
                 break;
             }
             default:
-                qDebug().noquote() << "Invalid opcode: " << QString::number(_opcode, 16);
+                //qDebug().noquote() << "Invalid opcode: " << QString::number(_opcode, 16);
                 break;
         }
 
         if (_registerSet.getDelayTimer() > 0)
         {
             _registerSet.decDelayTimer();
+        }
+
+        if (_registerSet.getSoundTimer() > 0)
+        {
+            _registerSet.decSoundTimer();
         }
     }
 }

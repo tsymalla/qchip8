@@ -36,6 +36,7 @@ namespace Chip8
         Byte getDelayTimer() const;
 
         void setSoundTimer(Byte value);
+        void decSoundTimer();
         Byte getSoundTimer() const;
     };
 }

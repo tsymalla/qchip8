@@ -97,6 +97,11 @@ namespace Chip8
         _soundTimer = value;
     }
 
+    void RegisterSet::decSoundTimer()
+    {
+        --_soundTimer;
+    }
+
     Byte RegisterSet::getSoundTimer() const
     {
         return _soundTimer;
