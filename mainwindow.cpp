@@ -62,7 +62,7 @@ void MainWindow::on_action_Load_ROM_triggered()
 
 void MainWindow::onRefreshScreen(Chip8::FrameBuffer framebuffer)
 {
-    QImage image((const unsigned char*)&framebuffer, Chip8::DISPLAY_WIDTH, Chip8::DISPLAY_HEIGHT, QImage::Format_Mono);
+    QImage image(reinterpret_cast<const unsigned char*>(&framebuffer), Chip8::DISPLAY_WIDTH, Chip8::DISPLAY_HEIGHT, QImage::Format_Mono);
     ui->lblImageBuffer->setPixmap(QPixmap::fromImage(image));
 }
 

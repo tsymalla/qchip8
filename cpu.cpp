@@ -6,7 +6,7 @@
 
 namespace Chip8
 {
-    CPU::CPU(QObject *parent): QObject(parent), _isRunning(false), _canRefreshScreen(false)
+    CPU::CPU(QObject* parent) : QObject(parent), _isRunning(false), _canRefreshScreen(false)
     {
     }
 
@@ -314,17 +314,16 @@ namespace Chip8
             }
             case 0xD000:
             {
-                unsigned short pixels{0};
-                unsigned short posX = _registerSet.getRegisterValue(registerX);
-                unsigned short posY = _registerSet.getRegisterValue(registerY);
-                unsigned short height = n;
-                auto addressRegister = _registerSet.getAddressRegister();
+                const auto posX = static_cast<Word>(_registerSet.getRegisterValue(registerX));
+                const auto posY = static_cast<Word>(_registerSet.getRegisterValue(registerY));
+                const auto height = n;
+                const auto addressRegister = _registerSet.getAddressRegister();
 
                 _registerSet.setRegisterValue(0xF, 0);
 
                 for (size_t vy = 0; vy < height; ++vy)
                 {
-                    pixels = _memory[addressRegister + posY];
+                    const unsigned short pixels = _memory[addressRegister + posY];
 
                     for (size_t vx = 0; vx < SPRITE_WIDTH; ++vx)
                     {
@@ -438,7 +437,7 @@ namespace Chip8
                             _memory[addressRegister + i] = _registerSet.getRegisterValue(i);
                         }
 
-                        _registerSet.incAddressRegister(registerX + 1);
+                        _registerSet.incAddressRegister(static_cast<Word>(registerX) + 1);
                         _stepProgramCounterByte();
 
                         break;
@@ -452,7 +451,7 @@ namespace Chip8
                             _registerSet.setRegisterValue(i, _memory[addressRegister + i]);
                         }
 
-                        _registerSet.incAddressRegister(registerX + 1);
+                        _registerSet.incAddressRegister(static_cast<Word>(registerX) + 1);
                         _stepProgramCounterByte();
 
                         break;
