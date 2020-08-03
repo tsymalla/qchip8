@@ -83,8 +83,8 @@ namespace Chip8
     {
         _opcode = _memory.readWord(_programCounter);
 
-        size_t registerIndex = (_opcode & 0x0F00) >> 8;
-        //qDebug() << _programCounter << " " << QString::number(_opcode, 16);
+        const size_t registerIndex = (_opcode & 0x0F00) >> 8;
+        qDebug() << _programCounter << " " << QString::number(_opcode, 16);
 
         switch (_opcode & 0xF000)
         {
