@@ -20,7 +20,7 @@ namespace Chip8
 
     Word RegisterSet::popStack()
     {
-        auto value = _stack[_stackPointer];
+        const auto value = _stack[_stackPointer];
         --_stackPointer;
 
         return value;

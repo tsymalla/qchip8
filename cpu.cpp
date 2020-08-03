@@ -74,25 +74,16 @@ namespace Chip8
         _programCounter += 2;
     }
 
-    void CPU::_stepProgramCounterWord()
-    {
-        _programCounter += 4;
-    }
-
     void CPU::_cycle()
     {
         _opcode = _memory.readWord(_programCounter);
         //qDebug() << _programCounter << " " << QString::number(_opcode, 16);
 
-        const auto x = _opcode & 0x0F00;
-        const size_t registerX = x >> 8;
-
-        const auto y = _opcode & 0x00F0;
-        const auto registerY = y >> 4;
-
-        const auto nnn = _opcode & 0x0FFF;
-        const auto nn = _opcode & 0x00FF;
-        const auto n = _opcode & 0x000F;
+        const size_t registerX = (_opcode & 0x0F00) >> 8;
+        const size_t registerY = (_opcode & 0x00F0) >> 4;
+        const Word nnn = _opcode & 0x0FFF;
+        const Byte nn = _opcode & 0x00FF;
+        const Byte n = _opcode & 0x000F;
 
         switch (_opcode & 0xF000)
         {
@@ -105,12 +96,14 @@ namespace Chip8
                         _framebuffer.fill(0x00);
                         _canRefreshScreen = true;
                         _stepProgramCounterByte();
+                    		
                         break;
                     }
                     case 0x000E:
                     {
                         _programCounter = _registerSet.popStack();
                         _stepProgramCounterByte();
+                    		
                         break;
                     }
                 }
@@ -130,8 +123,8 @@ namespace Chip8
             }
             case 0x3000:
             {
-                const auto reg = _registerSet.getRegisterValue(registerX);
-                if (reg == nn)
+                const auto regX = _registerSet.getRegisterValue(registerX);
+                if (regX == nn)
                 {
                     _stepProgramCounterByte();
                 }
@@ -142,8 +135,8 @@ namespace Chip8
             }
             case 0x4000:
             {
-                const auto reg = _registerSet.getRegisterValue(registerX);
-                if (reg != nn)
+                const auto regX = _registerSet.getRegisterValue(registerX);
+                if (regX != nn)
                 {
                     _stepProgramCounterByte();
                 }
@@ -214,9 +207,7 @@ namespace Chip8
                     }
                     case 0x0004:
                     {
-                        _registerSet.addRegisterValue(registerX, _registerSet.getRegisterValue(registerY));
-
-                        if (_registerSet.getRegisterValue(registerY) > (0xFF - _registerSet.getRegisterValue(registerX)))
+                        if (_registerSet.getRegisterValue(registerY) + _registerSet.getRegisterValue(registerX) > 0xFF)
                         {
                             _registerSet.setRegisterValue(0xF, 1);
                         }
@@ -224,14 +215,14 @@ namespace Chip8
                         {
                             _registerSet.setRegisterValue(0xF, 0);
                         }
+                    		
+                        _registerSet.addRegisterValue(registerX, _registerSet.getRegisterValue(registerY));
 
                         _stepProgramCounterByte();
                         break;
                     }
                     case 0x0005:
                     {
-                        _registerSet.subRegisterValue(registerX, _registerSet.getRegisterValue(registerY));
-
                         if (_registerSet.getRegisterValue(registerY) > _registerSet.getRegisterValue(registerX))
                         {
                             _registerSet.setRegisterValue(0xF, 0);
@@ -240,6 +231,8 @@ namespace Chip8
                         {
                             _registerSet.setRegisterValue(0xF, 1);
                         }
+                    		
+                        _registerSet.subRegisterValue(registerX, _registerSet.getRegisterValue(registerY));
 
                         _stepProgramCounterByte();
                         break;
@@ -254,9 +247,6 @@ namespace Chip8
                     }
                     case 0x0007:
                     {
-
-                        _registerSet.setRegisterValue(registerX, _registerSet.getRegisterValue(registerY) - _registerSet.getRegisterValue(registerX));
-
                         if (_registerSet.getRegisterValue(registerX) > _registerSet.getRegisterValue(registerY))
                         {
                             _registerSet.setRegisterValue(0xF, 0);
@@ -265,8 +255,10 @@ namespace Chip8
                         {
                             _registerSet.setRegisterValue(0xF, 1);
                         }
-
+                    		
+                        _registerSet.setRegisterValue(registerX, _registerSet.getRegisterValue(registerY) - _registerSet.getRegisterValue(registerX));
                         _stepProgramCounterByte();
+                    		
                         break;
                     }
                     case 0x000E:
@@ -307,7 +299,7 @@ namespace Chip8
             case 0xC000:
             {
                 const auto random = static_cast<Byte>(QRandomGenerator::global()->bounded(0x00, 0xFF));
-                _registerSet.setRegisterValue(registerX, random & (_opcode & nn));
+                _registerSet.setRegisterValue(registerX, random & nn);
 
                 _stepProgramCounterByte();
                 break;
@@ -323,12 +315,13 @@ namespace Chip8
 
                 for (size_t vy = 0; vy < height; ++vy)
                 {
-                    const unsigned short pixels = _memory[addressRegister + posY];
+                    const auto pixelIndex = addressRegister + posY;
+                    const unsigned short pixel = _memory[pixelIndex];
 
                     for (size_t vx = 0; vx < SPRITE_WIDTH; ++vx)
                     {
                         const size_t index = (posX + vx + ((posY + vy) * DISPLAY_WIDTH));
-                        if ((pixels & (0x80 >> vx)) != 0)
+                        if ((pixel & (0x80 >> vx)) != 0)
                         {
                             if (_framebuffer[index] == 1)
                             {
@@ -342,6 +335,8 @@ namespace Chip8
 
                 _canRefreshScreen = true;
                 _stepProgramCounterByte();
+
+                break;
             }
             case 0xE000:
             {
@@ -360,6 +355,8 @@ namespace Chip8
                         break;
                     }
                 }
+
+                break;
             }
             case 0xF000:
             {
@@ -395,7 +392,7 @@ namespace Chip8
                     }
                     case 0x001E:
                     {
-                        if (_registerSet.getAddressRegister() + _registerSet.getRegisterValue(registerX) > 0xFFF)
+                        if (_registerSet.getAddressRegister() + _registerSet.getRegisterValue(registerX) > 0xFF)
                         {
                             _registerSet.setRegisterValue(0xF, 1);
                         }
@@ -423,7 +420,7 @@ namespace Chip8
 
                         _memory[addressRegister] = reg / 100;
                         _memory[addressRegister + 1] = (reg / 10) % 10;
-                        _memory[addressRegister + 2] = reg % 10;
+                        _memory[addressRegister + 2] = reg % 100 % 10;
 
                         _stepProgramCounterByte();
                         break;
