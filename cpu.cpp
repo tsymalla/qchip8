@@ -179,28 +179,28 @@ namespace Chip8
                 {
                     case 0x0000:
                     {
-                        _registerSet.setRegisterValue(registerX, _registerSet.getRegisterValue(registerY));
+                        _registerSet.setRegisterValue(registerX, registerY);
                         _stepProgramCounterByte();
 
                         break;
                     }
                     case 0x0001:
                     {
-                        _registerSet.setRegisterValue(registerX, _registerSet.getRegisterValue(registerX) | _registerSet.getRegisterValue(registerY));
+                        _registerSet.setRegisterValue(registerX, registerX | registerY);
                         _stepProgramCounterByte();
 
                         break;
                     }
                     case 0x0002:
                     {
-                        _registerSet.setRegisterValue(registerX, _registerSet.getRegisterValue(registerX) & _registerSet.getRegisterValue(registerY));
+                        _registerSet.setRegisterValue(registerX, registerX & registerY);
                         _stepProgramCounterByte();
 
                         break;
                     }
                     case 0x0003:
                     {
-                        _registerSet.setRegisterValue(registerX, _registerSet.getRegisterValue(registerX) ^ _registerSet.getRegisterValue(registerY));
+                        _registerSet.setRegisterValue(registerX, registerX ^ registerY);
                         _stepProgramCounterByte();
 
                         break;
