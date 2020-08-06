@@ -78,8 +78,8 @@ namespace Chip8
     {
         _opcode = _memory.readWord(_programCounter);
 
-        const size_t registerX = (_opcode & 0x0F00) >> 8;
-        const size_t registerY = (_opcode & 0x00F0) >> 4;
+        const Byte registerX = (_opcode & 0x0F00) >> 8;
+        const Byte registerY = (_opcode & 0x00F0) >> 4;
         const Word nnn = _opcode & 0x0FFF;
         const Byte nn = _opcode & 0x00FF;
         const Byte n = _opcode & 0x000F;
