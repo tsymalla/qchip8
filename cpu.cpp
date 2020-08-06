@@ -77,7 +77,7 @@ namespace Chip8
     void CPU::_cycle()
     {
         _opcode = _memory.readWord(_programCounter);
-        //qDebug() << _programCounter << " " << QString::number(_opcode, 16);
+        qDebug() << _programCounter << " " << QString::number(_opcode, 16);
 
         const size_t registerX = (_opcode & 0x0F00) >> 8;
         const size_t registerY = (_opcode & 0x00F0) >> 4;

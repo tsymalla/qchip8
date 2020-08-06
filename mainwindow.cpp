@@ -57,12 +57,23 @@ void MainWindow::on_action_Load_ROM_triggered()
     _emulatorWorker->moveToThread(_emulatorThread);
     _connectSignals();
 
+    setWindowTitle(QString("qchip8 (%1)").arg(filename));
+
     _emulatorThread->start();
 }
 
 void MainWindow::onRefreshScreen(Chip8::FrameBuffer framebuffer)
 {
-    QImage image(reinterpret_cast<const unsigned char*>(&framebuffer), Chip8::DISPLAY_WIDTH, Chip8::DISPLAY_HEIGHT, QImage::Format_Mono);
+    QImage image(Chip8::DISPLAY_WIDTH, Chip8::DISPLAY_HEIGHT, QImage::Format_Mono);
+	
+	for (size_t y = 0; y < Chip8::DISPLAY_HEIGHT; ++y)
+	{
+		for (size_t x = 0; x < Chip8::DISPLAY_WIDTH; ++x)
+		{
+            image.setPixel(x, y, framebuffer[(y * Chip8::DISPLAY_WIDTH) + x]);
+		}
+	}
+
     ui->lblImageBuffer->setPixmap(QPixmap::fromImage(image));
 }
 
