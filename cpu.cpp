@@ -318,8 +318,8 @@ namespace Chip8
             }
             case 0xD000:
             {
-                const auto posX = static_cast<Word>(_registerSet.getRegisterValue(registerX));
-                const auto posY = static_cast<Word>(_registerSet.getRegisterValue(registerY));
+                const auto posX = _registerSet.getRegisterValue(registerX);
+                const auto posY = _registerSet.getRegisterValue(registerY);
                 const auto height = n;
                 const auto addressRegister = _registerSet.getAddressRegister();
 
@@ -327,7 +327,7 @@ namespace Chip8
 
                 for (size_t vy = 0; vy < height; ++vy)
                 {
-                    const auto pixelIndex = addressRegister + posY;
+                    const auto pixelIndex = addressRegister + vy;
                     const unsigned short pixel = _memory[pixelIndex];
 
                     for (size_t vx = 0; vx < SPRITE_WIDTH; ++vx)
