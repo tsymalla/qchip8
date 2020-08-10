@@ -7,28 +7,28 @@
 
 class EmulatorWorker : public QObject
 {
-    Q_OBJECT
+	Q_OBJECT
 
-        QMutex _mutex;
 public:
-    explicit EmulatorWorker(QObject* parent = nullptr);
-    void setROM(QString filename);
-    void keyDown(int key);
-    void keyUp(int key);
-	
-    void stopEmulation();
-    bool isRunning() const;
+	explicit EmulatorWorker(QObject* parent = nullptr);
+	void setROM(QString filename);
+	void keyDown(int key);
+	void keyUp(int key);
+
+	void stopEmulation();
+	bool isRunning() const;
 
 public slots:
-    void onRunEmulation();
-    void onRefreshScreen(Chip8::FrameBuffer framebuffer);
+	void onRunEmulation();
+	void onRefreshScreen(Chip8::FrameBuffer framebuffer);
 
 signals:
-    void refreshScreen(Chip8::FrameBuffer framebuffer);
-    void finishedEmulation();
+	void refreshScreen(Chip8::FrameBuffer framebuffer);
+	void finishedEmulation();
 
 private:
-    Chip8::CPU _emulator;
+	Chip8::CPU _emulator;
+	QMutex _mutex;
 };
 
 #endif // EMULATORWORKER_H
