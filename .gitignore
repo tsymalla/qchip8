@@ -49,3 +49,7 @@ out
 out/*
 .vs
 .vs/*
+
+.idea
+.idea/*
+cmake-build*
