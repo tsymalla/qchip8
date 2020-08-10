@@ -1,7 +1,7 @@
 #include "emulatorworker.h"
 #include <utility>
 
-EmulatorWorker::EmulatorWorker(QObject *parent): QObject(parent)
+EmulatorWorker::EmulatorWorker(QObject* parent) : QObject(parent)
 {
 }
 
@@ -28,7 +28,9 @@ void EmulatorWorker::onRunEmulation()
 
 void EmulatorWorker::stopEmulation()
 {
+    _mutex.lock();
     _emulator.stop();
+    _mutex.unlock();
 
     emit finishedEmulation();
 }

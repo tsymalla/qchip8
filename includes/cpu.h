@@ -6,7 +6,7 @@
 #include "datatypes.h"
 #include "memory.h"
 #include "registerset.h"
-#include "opcodeinterpreter.h"
+#include "is.h"
 
 namespace Chip8
 {
@@ -23,7 +23,6 @@ namespace Chip8
         void run();
         void stop();
         bool isRunning() const;
-        void _stepProgramCounterByte();
 
     signals:
         void refreshScreen(FrameBuffer framebuffer);
@@ -37,12 +36,13 @@ namespace Chip8
         Word _programCounter;
         Word _opcode;
         RegisterSet _registerSet;
+        IS *_is;
 
         FrameBuffer _framebuffer;
         StaticByteArray<KEY_COUNT> _keyStatus;
 
-        OpcodeInterpreter _opcodeInterpreter;
-
+        void _decode();
+        void _execute();
         void _cycle();
     };
 }

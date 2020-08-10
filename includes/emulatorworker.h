@@ -2,12 +2,14 @@
 #define EMULATORWORKER_H
 
 #include <QObject>
-#include <QMutex>
 #include "cpu.h"
+#include <QMutex>
 
-class EmulatorWorker: public QObject
+class EmulatorWorker : public QObject
 {
     Q_OBJECT
+
+        QMutex _mutex;
 public:
     explicit EmulatorWorker(QObject* parent = nullptr);
     void setROM(QString filename);
@@ -23,7 +25,6 @@ signals:
 
 private:
     Chip8::CPU _emulator;
-    QMutex _mutex;
 };
 
 #endif // EMULATORWORKER_H

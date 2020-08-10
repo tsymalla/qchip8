@@ -14,22 +14,24 @@ SET(CMAKE_AUTORCC ON)
 
 FIND_PACKAGE(Qt5 COMPONENTS Widgets REQUIRED)
 
+INCLUDE_DIRECTORIES(includes)
+
 ADD_EXECUTABLE(${PROJECT_NAME}
-    main.cpp
-    mainwindow.cpp
-    mainwindow.h
-    mainwindow.ui
-    cpu.cpp
-    cpu.h
-    opcodeinterpreter.cpp
-    opcodeinterpreter.h
-    memory.cpp
-    memory.h
-    datatypes.h
-    emulatorworker.cpp
-    emulatorworker.h
-    registerset.cpp
-    registerset.h
+    src/mainwindow.ui
+    src/main.cpp
+    src/mainwindow.cpp
+    src/cpu.cpp
+    src/registerset.cpp
+    src/is.cpp
+    src/memory.cpp
+    src/emulatorworker.cpp
+    includes/mainwindow.h
+    includes/cpu.h
+    includes/is.h
+    includes/memory.h
+    includes/datatypes.h
+    includes/emulatorworker.h
+    includes/registerset.h
 )
 
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} PRIVATE Qt5::Widgets)

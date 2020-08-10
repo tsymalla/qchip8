@@ -43,36 +43,45 @@ void MainWindow::on_action_Load_ROM_triggered()
         return;
     }
 
-    if (_emulatorThread == nullptr)
+    if (_emulatorWorker != nullptr)
     {
-        _emulatorThread = new QThread(this);
+        _emulatorWorker->stopEmulation();
     }
 
-    if (_emulatorWorker == nullptr)
+    if (_emulatorThread != nullptr)
     {
-        _emulatorWorker = new EmulatorWorker();
+        _emulatorThread->quit();
     }
+
+    _emulatorThread = new QThread(this);
+    _emulatorWorker = new EmulatorWorker();
 
     _emulatorWorker->setROM(filename);
-    _emulatorWorker->moveToThread(_emulatorThread);
     _connectSignals();
+    _emulatorWorker->moveToThread(_emulatorThread);
 
-    setWindowTitle(QString("qchip8 (%1)").arg(filename));
+	if (!_emulatorThread->isRunning())
+	{
+        _emulatorThread->start();
+	}
 
-    _emulatorThread->start();
+    QFileInfo fileInfo(filename);
+    setWindowTitle(QString("qchip8 (%1)").arg(fileInfo.fileName()));
 }
 
 void MainWindow::onRefreshScreen(Chip8::FrameBuffer framebuffer)
 {
     QImage image(Chip8::DISPLAY_WIDTH, Chip8::DISPLAY_HEIGHT, QImage::Format_Mono);
-	
-	for (size_t y = 0; y < Chip8::DISPLAY_HEIGHT; ++y)
-	{
-		for (size_t x = 0; x < Chip8::DISPLAY_WIDTH; ++x)
-		{
+
+    for (size_t y = 0; y < Chip8::DISPLAY_HEIGHT; ++y)
+    {
+        for (size_t x = 0; x < Chip8::DISPLAY_WIDTH; ++x)
+        {
             image.setPixel(x, y, framebuffer[(y * Chip8::DISPLAY_WIDTH) + x]);
-		}
-	}
+        }
+    }
+
+    image = image.scaled(width(), height(), Qt::KeepAspectRatio);
 
     ui->lblImageBuffer->setPixmap(QPixmap::fromImage(image));
 }
@@ -80,6 +89,7 @@ void MainWindow::onRefreshScreen(Chip8::FrameBuffer framebuffer)
 void MainWindow::_connectSignals()
 {
     connect(_emulatorThread, &QThread::started, _emulatorWorker, &EmulatorWorker::onRunEmulation);
+    connect(_emulatorThread, &QThread::finished, _emulatorWorker, &EmulatorWorker::deleteLater);
     connect(_emulatorWorker, &EmulatorWorker::finishedEmulation, _emulatorThread, &QThread::quit);
     connect(_emulatorWorker, &EmulatorWorker::finishedEmulation, _emulatorWorker, &EmulatorWorker::deleteLater);
     connect(_emulatorWorker, &EmulatorWorker::refreshScreen, this, &MainWindow::onRefreshScreen);
