@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 #include "./ui_mainwindow.h"
 #include <QFileDialog>
+#include <QKeyEvent>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -28,6 +29,26 @@ MainWindow::~MainWindow()
     }
 
     delete ui;
+}
+
+void MainWindow::keyPressEvent(QKeyEvent* event)
+{
+	if (!_isRunning())
+	{
+        return;
+	}
+
+	_emulatorWorker->keyDown(event->key());
+}
+
+void MainWindow::keyReleaseEvent(QKeyEvent* event)
+{
+    if (!_isRunning())
+    {
+        return;
+    }
+	
+	_emulatorWorker->keyUp(event->key());
 }
 
 void MainWindow::on_action_Exit_triggered()
@@ -93,4 +114,9 @@ void MainWindow::_connectSignals()
     connect(_emulatorWorker, &EmulatorWorker::finishedEmulation, _emulatorThread, &QThread::quit);
     connect(_emulatorWorker, &EmulatorWorker::finishedEmulation, _emulatorWorker, &EmulatorWorker::deleteLater);
     connect(_emulatorWorker, &EmulatorWorker::refreshScreen, this, &MainWindow::onRefreshScreen);
+}
+
+bool MainWindow::_isRunning() const
+{
+    return _emulatorWorker != nullptr && _emulatorWorker->isRunning();
 }

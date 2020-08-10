@@ -13,7 +13,11 @@ class EmulatorWorker : public QObject
 public:
     explicit EmulatorWorker(QObject* parent = nullptr);
     void setROM(QString filename);
+    void keyDown(int key);
+    void keyUp(int key);
+	
     void stopEmulation();
+    bool isRunning() const;
 
 public slots:
     void onRunEmulation();

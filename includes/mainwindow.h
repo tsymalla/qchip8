@@ -16,6 +16,10 @@ class MainWindow : public QMainWindow
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
+	
+protected:
+    void keyPressEvent(QKeyEvent* event) override;
+    void keyReleaseEvent(QKeyEvent* event) override;
 
 private slots:
     void on_action_Exit_triggered();
@@ -30,5 +34,7 @@ private:
     EmulatorWorker* _emulatorWorker;
 
     void _connectSignals();
+
+    bool _isRunning() const;
 };
 #endif // MAINWINDOW_H

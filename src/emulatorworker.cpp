@@ -13,6 +13,18 @@ void EmulatorWorker::setROM(QString filename)
     connect(&_emulator, &Chip8::CPU::refreshScreen, this, &EmulatorWorker::onRefreshScreen);
 }
 
+void EmulatorWorker::keyDown(int key)
+{
+    QMutexLocker locker(&_mutex);
+    _emulator.keyDown(key);
+}
+
+void EmulatorWorker::keyUp(int key)
+{
+    QMutexLocker locker(&_mutex);
+    _emulator.keyUp(key);
+}
+
 void EmulatorWorker::onRefreshScreen(Chip8::FrameBuffer framebuffer)
 {
     // forward message
@@ -33,4 +45,9 @@ void EmulatorWorker::stopEmulation()
     _mutex.unlock();
 
     emit finishedEmulation();
+}
+
+bool EmulatorWorker::isRunning() const
+{
+    return _emulator.isRunning();
 }

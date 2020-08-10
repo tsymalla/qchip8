@@ -32,7 +32,7 @@ namespace Chip8
         _programCounter = { 0x0200 };
         _opcode = { 0x0000 };
         _framebuffer.fill({ 0x00 });
-        _keyStatus.fill({ 0x00 });
+        _keyStatus.fill({ false });
 
         _is = new IS(_programCounter, _registerSet, _memory, _framebuffer, this);
     }
@@ -70,6 +70,26 @@ namespace Chip8
     bool CPU::isRunning() const
     {
         return _isRunning;
+    }
+
+    void CPU::keyDown(int key)
+    {
+    	if (KEY_MAP.count(key) == 0)
+    	{
+            return;
+    	}
+    	
+        _keyStatus[KEY_MAP.at(key)] = true;
+    }
+
+    void CPU::keyUp(int key)
+    {
+        if (KEY_MAP.count(key) == 0)
+        {
+            return;
+        }
+    	
+        _keyStatus[KEY_MAP.at(key)] = false;
     }
 
     void CPU::_decode()
