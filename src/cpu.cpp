@@ -1,7 +1,6 @@
 #include "cpu.h"
 #include <QFile>
-#include <QDebug>
-#include <QRandomGenerator>
+#include <QThread>
 
 namespace Chip8
 {

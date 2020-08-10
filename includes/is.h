@@ -3,6 +3,8 @@
 
 #include <QObject>
 #include "datatypes.h"
+#include "registerset.h"
+#include "memory.h"
 
 namespace Chip8
 {

@@ -120,3 +120,10 @@ bool MainWindow::_isRunning() const
 {
     return _emulatorWorker != nullptr && _emulatorWorker->isRunning();
 }
+
+void MainWindow::on_action_About_triggered()
+{
+    QMessageBox::information(this,
+                             "About qchip8",
+                             "A Qt- and C++ 17-based, multi-threaded emulator.\n\nWritten by Thomas Symalla in 2020.\nhttps://github.com/tsymalla/qchip8");
+}

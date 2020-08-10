@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <QThread>
+#include <QMessageBox>
 #include "emulatorworker.h"
 
 QT_BEGIN_NAMESPACE
@@ -27,6 +28,8 @@ private slots:
     void on_action_Load_ROM_triggered();
 
     void onRefreshScreen(Chip8::FrameBuffer framebuffer);
+
+    void on_action_About_triggered();
 
 private:
     Ui::MainWindow *ui;

@@ -1,4 +1,6 @@
 #include "is.h"
+#include <QDebug>
+#include <QRandomGenerator>
 
 namespace Chip8
 {
