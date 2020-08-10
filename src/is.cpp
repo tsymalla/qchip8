@@ -269,9 +269,15 @@ namespace Chip8
 
                 for (size_t vx = 0; vx < SPRITE_WIDTH; ++vx)
                 {
-                    const size_t index = (posX + vx + ((posY + vy) * DISPLAY_WIDTH));
+                    size_t index = (posX + vx + ((posY + vy) * DISPLAY_WIDTH));
                     if ((pixel & (0x80 >> vx)) != 0)
                     {
+                    	// implement wraparound
+                    	if (index > DISPLAY_SIZE)
+                    	{
+                            index %= DISPLAY_SIZE;
+                    	}
+                    	
                         if (_framebuffer[index] == 1)
                         {
                             _registerSet.setRegisterValue(0xF, 1);
