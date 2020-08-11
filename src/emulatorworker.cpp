@@ -33,6 +33,7 @@ void EmulatorWorker::onRefreshScreen(Chip8::FrameBuffer framebuffer)
 
 void EmulatorWorker::onRunEmulation()
 {
+	_emulator.reset();
 	_emulator.run();
 
 	emit finishedEmulation();

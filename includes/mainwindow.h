@@ -12,35 +12,41 @@ QT_END_NAMESPACE
 
 class MainWindow : public QMainWindow
 {
-    Q_OBJECT
+	Q_OBJECT
 
 public:
-    MainWindow(QWidget *parent = nullptr);
-    ~MainWindow();
-	
+	MainWindow(QWidget* parent = nullptr);
+	~MainWindow();
+
 protected:
-    void keyPressEvent(QKeyEvent* event) override;
-    void keyReleaseEvent(QKeyEvent* event) override;
+	void keyPressEvent(QKeyEvent* event) override;
+	void keyReleaseEvent(QKeyEvent* event) override;
 
 private slots:
-    void on_action_Exit_triggered();
+	void on_action_Exit_triggered();
 
-    void on_action_Load_ROM_triggered();
+	void on_action_Load_ROM_triggered();
 
-    void onRefreshScreen(Chip8::FrameBuffer framebuffer);
+	void onRefreshScreen(Chip8::FrameBuffer framebuffer);
 
-    void on_action_About_triggered();
+	void on_action_About_triggered();
+
+	void on_action_Start_emulation_triggered();
+
+	void on_actionStop_emulation_triggered();
 
 signals:
-    void stopEmulation();
+	void stopEmulation();
 
 private:
-    Ui::MainWindow *ui;
-    QThread* _emulatorThread;
-    EmulatorWorker* _emulatorWorker;
+	Ui::MainWindow* ui;
+	QThread* _emulatorThread;
+	EmulatorWorker* _emulatorWorker;
+	QString _lastFile;
 
-    void _connectSignals() const;
+	void _connectSignals() const;
+	void _startEmulation();
 
-    bool _isRunning() const;
+	bool _isRunning() const;
 };
 #endif // MAINWINDOW_H

@@ -64,30 +64,8 @@ void MainWindow::on_action_Load_ROM_triggered()
 		return;
 	}
 
-	if (_emulatorWorker != nullptr)
-	{
-		emit stopEmulation();
-	}
-
-	if (_emulatorThread != nullptr)
-	{
-		_emulatorThread->quit();
-	}
-
-	_emulatorThread = new QThread(this);
-	_emulatorWorker = new EmulatorWorker();
-
-	_emulatorWorker->setROM(filename);
-	_connectSignals();
-	_emulatorWorker->moveToThread(_emulatorThread);
-
-	if (!_emulatorThread->isRunning())
-	{
-		_emulatorThread->start();
-	}
-
-	QFileInfo fileInfo(filename);
-	setWindowTitle(QString("qchip8 (%1)").arg(fileInfo.fileName()));
+	_lastFile = filename;
+	_startEmulation();
 }
 
 void MainWindow::onRefreshScreen(Chip8::FrameBuffer framebuffer)
@@ -117,6 +95,41 @@ void MainWindow::_connectSignals() const
 	connect(_emulatorWorker, &EmulatorWorker::refreshScreen, this, &MainWindow::onRefreshScreen);
 }
 
+void MainWindow::_startEmulation()
+{
+	if (_emulatorWorker != nullptr)
+	{
+		emit stopEmulation();
+	}
+
+	if (_emulatorThread != nullptr)
+	{
+		_emulatorThread->quit();
+	}
+
+	_emulatorThread = new QThread(this);
+	_emulatorWorker = new EmulatorWorker();
+
+	_emulatorWorker->setROM(_lastFile);
+	_connectSignals();
+	_emulatorWorker->moveToThread(_emulatorThread);
+
+	if (!_emulatorThread->isRunning())
+	{
+		_emulatorThread->start();
+	}
+
+	QFileInfo fileInfo(_lastFile);
+	setWindowTitle(QString("qchip8 (%1)").arg(fileInfo.fileName()));
+
+	ui->menu_Emulation->setEnabled(true);
+	ui->action_Start_emulation->setEnabled(false);
+	ui->actionStop_emulation->setEnabled(true);
+
+	ui->action_Start_emulation->setEnabled(false);
+	ui->actionStop_emulation->setEnabled(true);
+}
+
 bool MainWindow::_isRunning() const
 {
 	return _emulatorWorker != nullptr && _emulatorWorker->isRunning();
@@ -127,4 +140,16 @@ void MainWindow::on_action_About_triggered()
 	QMessageBox::information(this,
 		"About qchip8",
 		"A Qt- and C++ 17-based, multi-threaded emulator.\n\nWritten by Thomas Symalla in 2020.\nhttps://github.com/tsymalla/qchip8");
+}
+
+void MainWindow::on_action_Start_emulation_triggered()
+{
+	_startEmulation();
+}
+
+void MainWindow::on_actionStop_emulation_triggered()
+{
+	emit stopEmulation();
+	ui->actionStop_emulation->setEnabled(false);
+	ui->action_Start_emulation->setEnabled(true);
 }
