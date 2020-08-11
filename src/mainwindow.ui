@@ -80,6 +80,8 @@
     </property>
     <addaction name="action_Start_emulation"/>
     <addaction name="actionStop_emulation"/>
+    <addaction name="separator"/>
+    <addaction name="actionTake_screenshot"/>
    </widget>
    <addaction name="menu_File"/>
    <addaction name="menu_Emulation"/>
@@ -114,6 +116,11 @@
   <action name="actionStop_emulation">
    <property name="text">
     <string>Stop emulation</string>
+   </property>
+  </action>
+  <action name="actionTake_screenshot">
+   <property name="text">
+    <string>Take screenshot</string>
    </property>
   </action>
  </widget>

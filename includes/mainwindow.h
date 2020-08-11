@@ -35,6 +35,8 @@ private slots:
 
 	void on_actionStop_emulation_triggered();
 
+	void on_actionTake_screenshot_triggered();
+
 signals:
 	void stopEmulation();
 
@@ -43,6 +45,7 @@ private:
 	QThread* _emulatorThread;
 	EmulatorWorker* _emulatorWorker;
 	QString _lastFile;
+	QImage _framebuffer;
 
 	void _connectSignals() const;
 	void _startEmulation();

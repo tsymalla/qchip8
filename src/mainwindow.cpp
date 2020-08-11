@@ -65,24 +65,26 @@ void MainWindow::on_action_Load_ROM_triggered()
 	}
 
 	_lastFile = filename;
+
 	_startEmulation();
 }
 
 void MainWindow::onRefreshScreen(Chip8::FrameBuffer framebuffer)
 {
-	QImage image(Chip8::DISPLAY_WIDTH, Chip8::DISPLAY_HEIGHT, QImage::Format_Mono);
+	_framebuffer = QImage(Chip8::DISPLAY_WIDTH, Chip8::DISPLAY_HEIGHT, QImage::Format_Mono);
+	_framebuffer.fill(QColorConstants::Black);
 
 	for (size_t y = 0; y < Chip8::DISPLAY_HEIGHT; ++y)
 	{
 		for (size_t x = 0; x < Chip8::DISPLAY_WIDTH; ++x)
 		{
-			image.setPixel(x, y, framebuffer[(y * Chip8::DISPLAY_WIDTH) + x]);
+			_framebuffer.setPixel(x, y, framebuffer[(y * Chip8::DISPLAY_WIDTH) + x]);
 		}
 	}
 
-	image = image.scaled(width(), height(), Qt::KeepAspectRatio);
+	_framebuffer = _framebuffer.scaled(width(), height(), Qt::KeepAspectRatio);
 
-	ui->lblImageBuffer->setPixmap(QPixmap::fromImage(image));
+	ui->lblImageBuffer->setPixmap(QPixmap::fromImage(_framebuffer));
 }
 
 void MainWindow::_connectSignals() const
@@ -127,6 +129,7 @@ void MainWindow::_startEmulation()
 	ui->actionStop_emulation->setEnabled(true);
 
 	ui->action_Start_emulation->setEnabled(false);
+	ui->actionTake_screenshot->setEnabled(true);
 	ui->actionStop_emulation->setEnabled(true);
 }
 
@@ -151,5 +154,24 @@ void MainWindow::on_actionStop_emulation_triggered()
 {
 	emit stopEmulation();
 	ui->actionStop_emulation->setEnabled(false);
+	ui->actionTake_screenshot->setEnabled(false);
 	ui->action_Start_emulation->setEnabled(true);
+}
+
+void MainWindow::on_actionTake_screenshot_triggered()
+{
+	// copy the current buffer
+	QImage currentBuffer = _framebuffer;
+
+	const auto file = QFileDialog::getSaveFileName(this, "Select file", QDir::homePath(), "Image files (*.png *.jpg *.bmp)");
+	const auto result = currentBuffer.save(file);
+
+	if (result)
+	{
+		QMessageBox::information(this, "Success", QString("The screenshot was taken and saved to %1.").arg(file));
+	}
+	else
+	{
+		QMessageBox::warning(this, "Failure", QString("Could not save to %1.").arg(file));
+	}
 }
