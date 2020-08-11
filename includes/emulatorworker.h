@@ -15,11 +15,11 @@ public:
 	void keyDown(int key);
 	void keyUp(int key);
 
-	void stopEmulation();
 	bool isRunning() const;
 
 public slots:
 	void onRunEmulation();
+	void onStopEmulation();
 	void onRefreshScreen(Chip8::FrameBuffer framebuffer);
 
 signals:

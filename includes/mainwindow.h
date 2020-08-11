@@ -31,12 +31,15 @@ private slots:
 
     void on_action_About_triggered();
 
+signals:
+    void stopEmulation();
+
 private:
     Ui::MainWindow *ui;
     QThread* _emulatorThread;
     EmulatorWorker* _emulatorWorker;
 
-    void _connectSignals();
+    void _connectSignals() const;
 
     bool _isRunning() const;
 };
