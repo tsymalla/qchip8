@@ -72,7 +72,7 @@ void MainWindow::on_action_Load_ROM_triggered()
 void MainWindow::onRefreshScreen(Chip8::FrameBuffer framebuffer)
 {
 	_framebuffer = QImage(Chip8::DISPLAY_WIDTH, Chip8::DISPLAY_HEIGHT, QImage::Format_Mono);
-	_framebuffer.fill(QColorConstants::Black);
+	_framebuffer.fill(Qt::black);
 
 	for (size_t y = 0; y < Chip8::DISPLAY_HEIGHT; ++y)
 	{
