@@ -126,9 +126,6 @@ void MainWindow::_startEmulation()
 
 	ui->menu_Emulation->setEnabled(true);
 	ui->action_Start_emulation->setEnabled(false);
-	ui->actionStop_emulation->setEnabled(true);
-
-	ui->action_Start_emulation->setEnabled(false);
 	ui->actionTake_screenshot->setEnabled(true);
 	ui->actionStop_emulation->setEnabled(true);
 }
