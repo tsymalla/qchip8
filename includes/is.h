@@ -11,7 +11,12 @@ namespace Chip8
 	class IS : QObject
 	{
 	public:
-		IS(Word& programCounter, RegisterSet& registerSet, Memory& memory, FrameBuffer& framebuffer, QObject* parent = nullptr);
+        IS(Word& programCounter,
+           RegisterSet& registerSet,
+           Memory& memory,
+           FrameBuffer& framebuffer,
+           KeyBuffer& keybuffer,
+           QObject* parent = nullptr);
 
 		bool step(const Word& opcode);
 
@@ -19,7 +24,8 @@ namespace Chip8
 		Word& _programCounter;
 		RegisterSet& _registerSet;
 		Memory& _memory;
-		FrameBuffer& _framebuffer;
+        FrameBuffer& _framebuffer;
+        KeyBuffer& _keybuffer;
 		void _stepProgramCounterByte();
 	};
 }

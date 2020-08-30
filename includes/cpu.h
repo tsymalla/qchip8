@@ -43,13 +43,25 @@ namespace Chip8
         IS *_is;
 
         FrameBuffer _framebuffer;
-        StaticArray<bool, KEY_COUNT> _keyStatus;
+        KeyBuffer _keyStatus;
 
         void _decode();
         void _execute();
         void _cycle();
 
         inline const static std::map<int, int> KEY_MAP = {
+            {
+                Qt::Key_1, 0
+            },
+            {
+                Qt::Key_2, 1
+            },
+            {
+                Qt::Key_3, 2
+            },
+            {
+                Qt::Key_4, 4
+            },
             {
                 Qt::Key_Up, 8
             },

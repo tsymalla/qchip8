@@ -29,6 +29,7 @@ namespace Chip8
     constexpr static size_t KEY_COUNT = 16;
 
     using FrameBuffer = StaticByteArray<DISPLAY_SIZE>;
+    using KeyBuffer = StaticArray<bool, KEY_COUNT>;
 }
 
 Q_DECLARE_METATYPE(Chip8::FrameBuffer);

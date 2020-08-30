@@ -33,7 +33,7 @@ namespace Chip8
 		_framebuffer.fill({ 0x00 });
 		_keyStatus.fill({ false });
 
-		_is = new IS(_programCounter, _registerSet, _memory, _framebuffer, this);
+        _is = new IS(_programCounter, _registerSet, _memory, _framebuffer, _keyStatus, this);
 	}
 
 	void CPU::reset()
