@@ -4,13 +4,13 @@
 
 namespace Chip8
 {
-    IS::IS(Word& programCounter, RegisterSet& registerSet, Memory& memory, FrameBuffer& framebuffer, KeyBuffer& keybuffer, QObject* parent) :
+	IS::IS(Word& programCounter, RegisterSet& registerSet, Memory& memory, FrameBuffer& framebuffer, KeyBuffer& keybuffer, QObject* parent) :
 		QObject(parent),
 		_programCounter(programCounter),
 		_registerSet(registerSet),
 		_memory(memory),
-        _framebuffer(framebuffer),
-        _keybuffer(keybuffer)
+		_framebuffer(framebuffer),
+		_keybuffer(keybuffer)
 	{
 	}
 
@@ -301,39 +301,39 @@ namespace Chip8
 		}
 		case 0xE000:
 		{
-            switch (nn)
+			switch (nn)
 			{
-				case 0x009E:
-	            {
-	                const auto regX = _registerSet.getRegisterValue(registerX);
-	                if (_keybuffer[regX])
-	                {
-	                    // key was pressed
-	                    _stepProgramCounterByte();
-	                }
-
+			case 0x009E:
+			{
+				const auto regX = _registerSet.getRegisterValue(registerX);
+				if (_keybuffer[regX])
+				{
+					// key was pressed
 					_stepProgramCounterByte();
-					break;
 				}
-				case 0x00A1:
-	            {
-	                const auto regX = _registerSet.getRegisterValue(registerX);
-	                if (!_keybuffer[regX])
-	                {
-	                    // key was pressed
-	                    _stepProgramCounterByte();
-	                }
 
+				_stepProgramCounterByte();
+				break;
+			}
+			case 0x00A1:
+			{
+				const auto regX = _registerSet.getRegisterValue(registerX);
+				if (!_keybuffer[regX])
+				{
+					// key was pressed
 					_stepProgramCounterByte();
-					break;
 				}
+
+				_stepProgramCounterByte();
+				break;
+			}
 			}
 
 			break;
 		}
 		case 0xF000:
 		{
-            switch (nn)
+			switch (nn)
 			{
 			case 0x0007:
 			{
@@ -343,8 +343,8 @@ namespace Chip8
 				break;
 			}
 			case 0x000A:
-            {
-                bool isPressed = false;
+			{
+				bool isPressed = false;
 
 				for (size_t i = 0; i < KEY_COUNT; ++i)
 				{
@@ -355,10 +355,10 @@ namespace Chip8
 					}
 				}
 
-                if (!isPressed)
-                {
-                    break;
-                }
+				if (!isPressed)
+				{
+					break;
+				}
 
 				_stepProgramCounterByte();
 

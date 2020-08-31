@@ -50,6 +50,8 @@ out/*
 .vs
 .vs/*
 
+CMakeSettings.json
+
 .idea
 .idea/*
 cmake-build*
