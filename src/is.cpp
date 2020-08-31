@@ -281,12 +281,15 @@ namespace Chip8
 							index %= DISPLAY_SIZE;
 						}
 
-						if (_framebuffer[index] == 1)
+						if (index <= _framebuffer.size())
 						{
-							_registerSet.setRegisterValue(0xF, 1);
-						}
+							if (_framebuffer[index] == 1)
+							{
+								_registerSet.setRegisterValue(0xF, 1);
+							}
 
-						_framebuffer[index] ^= 1;
+							_framebuffer[index] ^= 1;
+						}
 					}
 				}
 			}
@@ -300,30 +303,30 @@ namespace Chip8
 		{
             switch (nn)
 			{
-			case 0x009E:
-            {
-                const auto regX = _registerSet.getRegisterValue(registerX);
-                if (_keybuffer[regX])
-                {
-                    // key was pressed
-                    _stepProgramCounterByte();
-                }
+				case 0x009E:
+	            {
+	                const auto regX = _registerSet.getRegisterValue(registerX);
+	                if (_keybuffer[regX])
+	                {
+	                    // key was pressed
+	                    _stepProgramCounterByte();
+	                }
 
-				_stepProgramCounterByte();
-				break;
-			}
-			case 0x00A1:
-            {
-                const auto regX = _registerSet.getRegisterValue(registerX);
-                if (!_keybuffer[regX])
-                {
-                    // key was pressed
-                    _stepProgramCounterByte();
-                }
+					_stepProgramCounterByte();
+					break;
+				}
+				case 0x00A1:
+	            {
+	                const auto regX = _registerSet.getRegisterValue(registerX);
+	                if (!_keybuffer[regX])
+	                {
+	                    // key was pressed
+	                    _stepProgramCounterByte();
+	                }
 
-				_stepProgramCounterByte();
-				break;
-			}
+					_stepProgramCounterByte();
+					break;
+				}
 			}
 
 			break;
@@ -343,14 +346,14 @@ namespace Chip8
             {
                 bool isPressed = false;
 
-                for (size_t i = 0; i < KEY_COUNT; ++i)
-                {
-                    if (_keybuffer[i])
-                    {
-                        _registerSet.setRegisterValue(registerX, i);
-                        isPressed = true;
-                    }
-                }
+				for (size_t i = 0; i < KEY_COUNT; ++i)
+				{
+					if (_keybuffer[i])
+					{
+						_registerSet.setRegisterValue(registerX, i);
+						isPressed = true;
+					}
+				}
 
                 if (!isPressed)
                 {
