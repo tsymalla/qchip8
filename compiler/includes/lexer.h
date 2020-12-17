@@ -79,6 +79,7 @@ namespace compiler
         char _currentChar() const;
         bool _isDigit(char c) const;
         bool _isSpace(char c) const;
+        bool _isDone() const;
 
         Token _getNumber();
 

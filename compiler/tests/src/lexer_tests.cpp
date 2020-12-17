@@ -3,9 +3,22 @@
 
 #include <lexer.h>
 
+static int lexAndReturnNumberOfTokens(std::string input)
+{
+    compiler::Lexer lexer(std::move(input));
+    auto result = lexer.Lex();
+    
+    return result.size();
+}
+
 TEST_CASE("Lexer lexes numbers correctly")
 {
-    compiler::Lexer lexer("2345,");
-    auto result = lexer.Lex();
-    REQUIRE(result.size() == 1);
+    auto tokenCount = lexAndReturnNumberOfTokens("23455,");
+    REQUIRE(tokenCount == 2);
+}
+
+TEST_CASE("Lexer lexes spaces correctly")
+{
+    auto tokenCount = lexAndReturnNumberOfTokens("    23455    ,");
+    REQUIRE(tokenCount == 2);
 }

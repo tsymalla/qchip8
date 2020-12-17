@@ -49,6 +49,11 @@ namespace compiler
         return (c == ' ' || c == '\t');
     }
 
+    bool Lexer::_isDone() const
+    {
+        return _currentPos >= _input.length();
+    }
+
     Token Lexer::_getNumber()
     {
         auto start = _currentPos;
@@ -62,7 +67,7 @@ namespace compiler
             _forward();
         }
 
-        int number = std::stoi(_input.substr(start, end));
+        int number = std::stoi(_input.substr(start, end + 1));
 
         return Token::TokenKind(Token::TokenKind::NUMBER);
     }
@@ -79,6 +84,7 @@ namespace compiler
             return _getNumber();
         }
 
+        _forward();
         return Token(Token::TokenKind::COMMA);
     }
 
@@ -86,11 +92,10 @@ namespace compiler
     {
         _tokens.clear();
 
-        Token currentToken = _getNextToken();
-        while (currentToken.getKind() != Token::TokenKind::COMMA)
+        while (!_isDone())
         {
+            auto currentToken = _getNextToken();
             _tokens.push_back(currentToken);
-            currentToken = _getNextToken();
         }
 
         return _tokens;

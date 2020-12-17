@@ -55,3 +55,6 @@ CMakeSettings.json
 .idea
 .idea/*
 cmake-build*
+
+.vscode
+.vscode/*
