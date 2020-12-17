@@ -13,3 +13,5 @@ ADD_LIBRARY(${PROJECT_NAME} STATIC
     src/lexer.cpp
     includes/lexer.h
 )
+
+ADD_SUBDIRECTORY(tests)
