@@ -12,24 +12,24 @@ namespace compiler
     public:
         enum class TokenKind : size_t
         {
-            NUMBER              = 1,
-            ID                  = 2,
-            OPEN_PARENTHESIS    = 3,
-            CLOSE_PARENTHESIS   = 4,
-            OPEN_CURLY_BRACKET  = 5,
-            CLOSE_CURLY_BRACKET = 6,
-            LESS                = 7,
-            LESS_OR_EQUAL       = 8,
-            GREATER             = 9,
-            GREATER_OR_EQUAL    = 10,
-            EQUAL               = 11,
-            PLUS                = 12,
-            MINUS               = 13,
-            ASTERISK            = 14,
-            SLASH               = 15,
-            COMMA               = 16,
-            SEMICOLON           = 17,
-            COMMENT             = 18
+            NUMBER              = 0,
+            ID                  = 1,
+            OPEN_PARENTHESIS    = 2,
+            CLOSE_PARENTHESIS   = 3,
+            OPEN_CURLY_BRACKET  = 4,
+            CLOSE_CURLY_BRACKET = 5,
+            LESS                = 6,
+            LESS_OR_EQUAL       = 7,
+            GREATER             = 8,
+            GREATER_OR_EQUAL    = 9,
+            EQUAL               = 10,
+            PLUS                = 11,
+            MINUS               = 12,
+            ASTERISK            = 13,
+            SLASH               = 14,
+            COMMA               = 15,
+            SEMICOLON           = 16,
+            COMMENT             = 17
         };
 
         Token(TokenKind kind);
@@ -37,12 +37,7 @@ namespace compiler
         TokenKind getKind() const;
         const char* getName() const;
 
-        std::ostream& operator<<(std::ostream& rhs)
-        {
-            rhs << getName();
-            return rhs;
-        }
-
+        friend std::ostream& operator<<(std::ostream& rhs, const Token& token);
     private:
         TokenKind _kind;
 
@@ -63,7 +58,7 @@ namespace compiler
             "-",
             "*",
             "/",
-            ","
+            ",",
             ";",
             "//"
         };
@@ -77,11 +72,18 @@ namespace compiler
 
         void _forward();
         char _currentChar() const;
+        bool _isLetter(char c) const;
         bool _isDigit(char c) const;
         bool _isSpace(char c) const;
+        bool _isSpecialCharacter(char c) const;
+        bool _isArithmeticOperator(char c) const;
         bool _isDone() const;
 
+        Token _getIdentifier();
         Token _getNumber();
+        Token _getKeyword();
+        Token _getSpecialCharacter();
+        Token _getArithmeticOperator();
 
         Token _getNextToken();
     public:

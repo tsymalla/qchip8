@@ -2,6 +2,12 @@
 
 namespace compiler
 {
+    std::ostream& operator<<(std::ostream& rhs, const Token& token)
+    {
+        rhs << token.getName();
+        return rhs;
+    }
+
     Token::Token(Token::TokenKind kind) :
         _kind{kind}
     {
@@ -21,22 +27,21 @@ namespace compiler
         _input{std::move(input)},
         _currentPos{0}
     {
-
     }
 
     void Lexer::_forward()
     {
-        if (_currentPos >= _input.length())
-        {
-            return;
-        }
-
         ++_currentPos;
     }
 
     char Lexer::_currentChar() const
     {
         return _input[_currentPos];
+    }
+
+    bool Lexer::_isLetter(char c) const
+    {
+        return std::isalpha(static_cast<int>(c));
     }
 
     bool Lexer::_isDigit(char c) const
@@ -49,9 +54,49 @@ namespace compiler
         return (c == ' ' || c == '\t');
     }
 
+    bool Lexer::_isSpecialCharacter(char c) const
+    {
+        return
+        (
+            c == '(' ||
+            c == ')' ||
+            c == '{' ||
+            c == '}'
+        );
+    }
+
+    bool Lexer::_isArithmeticOperator(char c) const
+    {
+        return
+        (
+            c == '+' ||
+            c == '-' ||
+            c == '*' ||
+            c == '/'
+        );
+    }
+
     bool Lexer::_isDone() const
     {
         return _currentPos >= _input.length();
+    }
+
+    Token Lexer::_getIdentifier()
+    {
+        auto start = _currentPos;
+        int end = start;
+
+        _forward();
+
+        while (_isDigit(_currentChar()) || _isLetter(_currentChar()))
+        {
+            ++end;
+            _forward();
+        }
+
+        std::string identifier = _input.substr(start, end + 1);
+
+        return Token(Token::TokenKind::ID);
     }
 
     Token Lexer::_getNumber()
@@ -69,7 +114,54 @@ namespace compiler
 
         int number = std::stoi(_input.substr(start, end + 1));
 
-        return Token::TokenKind(Token::TokenKind::NUMBER);
+        return Token(Token::TokenKind::NUMBER);
+    }
+
+    Token Lexer::_getKeyword()
+    {
+        return Token(Token::TokenKind::GREATER);
+    }
+
+    Token Lexer::_getSpecialCharacter()
+    {
+        char currentChar = _currentChar();
+        _forward();
+
+        if (currentChar == '(')
+        {
+            return Token(Token::TokenKind::OPEN_PARENTHESIS);
+        }
+        else if (currentChar == ')')
+        {
+            return Token(Token::TokenKind::CLOSE_PARENTHESIS);
+        }
+        else if (currentChar == '{')
+        {
+            return Token(Token::TokenKind::OPEN_CURLY_BRACKET);
+        }
+        
+        return Token(Token::TokenKind::CLOSE_CURLY_BRACKET);
+    }
+
+    Token Lexer::_getArithmeticOperator()
+    {
+        char currentChar = _currentChar();
+        _forward();
+
+        if (currentChar == '+')
+        {
+            return Token(Token::TokenKind::PLUS);
+        }
+        else if (currentChar == '-')
+        {
+            return Token(Token::TokenKind::MINUS);
+        }
+        else if (currentChar == '*')
+        {
+            return Token(Token::TokenKind::ASTERISK);
+        }
+
+        return Token(Token::TokenKind::SLASH);
     }
 
     Token Lexer::_getNextToken()
@@ -77,6 +169,21 @@ namespace compiler
         while (_isSpace(_currentChar()))
         {
             _forward();
+        }
+
+        if (_isSpecialCharacter(_currentChar()))
+        {
+            return _getSpecialCharacter();
+        }
+
+        if (_isArithmeticOperator(_currentChar()))
+        {
+            return _getArithmeticOperator();
+        }
+
+        if (_isLetter(_currentChar()))
+        {
+            return _getIdentifier();
         }
 
         if (_isDigit(_currentChar()))
@@ -100,5 +207,4 @@ namespace compiler
 
         return _tokens;
     }
-
 }
