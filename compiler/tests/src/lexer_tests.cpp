@@ -64,3 +64,29 @@ TEST_CASE("Lexer lexes arithmetic operators correctly")
     REQUIRE(tokens[9].getKind() == Token::TokenKind::ASTERISK);
     REQUIRE(tokens[11].getKind() == Token::TokenKind::MINUS);
 }
+
+TEST_CASE("Lexer lexes comments correctly")
+{
+    auto tokens = lexAndReturnNumberOfTokens("1+2//comment");
+    REQUIRE(tokens.size() == 4);
+    REQUIRE(tokens[0].getKind() == Token::TokenKind::NUMBER);
+    REQUIRE(tokens[1].getKind() == Token::TokenKind::PLUS);
+    REQUIRE(tokens[2].getKind() == Token::TokenKind::NUMBER);
+    REQUIRE(tokens[3].getKind() == Token::TokenKind::COMMENT);
+}
+
+TEST_CASE("Lexer lexes multi-lines correctly")
+{
+    auto tokens = lexAndReturnNumberOfTokens(
+        "1+2; // comment\n \
+        3+4");
+    REQUIRE(tokens.size() == 8);
+    REQUIRE(tokens[0].getKind() == Token::TokenKind::NUMBER);
+    REQUIRE(tokens[1].getKind() == Token::TokenKind::PLUS);
+    REQUIRE(tokens[2].getKind() == Token::TokenKind::NUMBER);
+    REQUIRE(tokens[3].getKind() == Token::TokenKind::SEMICOLON);
+    REQUIRE(tokens[4].getKind() == Token::TokenKind::COMMENT);
+    REQUIRE(tokens[5].getKind() == Token::TokenKind::NUMBER);
+    REQUIRE(tokens[6].getKind() == Token::TokenKind::PLUS);
+    REQUIRE(tokens[7].getKind() == Token::TokenKind::NUMBER);
+}

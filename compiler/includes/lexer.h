@@ -45,22 +45,22 @@ namespace compiler
         {
             "NUMBER",
             "ID",
-            "(",
-            ")",
-            "{",
-            "}",
-            "<",
-            "<=",
-            ">",
-            ">=",
-            "=",
-            "+",
-            "-",
-            "*",
-            "/",
-            ",",
-            ";",
-            "//"
+            "OPEN_BRACKET",
+            "CLOSE_BRACKET",
+            "OPEN_CURLY_BRACKET",
+            "CLOSE_CURLY_BRACKET",
+            "LESS",
+            "LESS_OR_EQUAL",
+            "GREATER",
+            "GREATER_OR_EQUAL",
+            "EQUAL",
+            "PLUS",
+            "MINUS",
+            "ASTERISK",
+            "SLASH",
+            "COMMA",
+            "SEMICOLON",
+            "COMMENT"
         };
     };
 
@@ -79,6 +79,7 @@ namespace compiler
         bool _isArithmeticOperator(char c) const;
         bool _isDone() const;
 
+        Token _getSlashOrComment();
         Token _getIdentifier();
         Token _getNumber();
         Token _getKeyword();

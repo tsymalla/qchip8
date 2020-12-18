@@ -51,7 +51,7 @@ namespace compiler
 
     bool Lexer::_isSpace(char c) const
     {
-        return (c == ' ' || c == '\t');
+        return (c == ' ' || c == '\t' || c == '\n');
     }
 
     bool Lexer::_isSpecialCharacter(char c) const
@@ -61,7 +61,8 @@ namespace compiler
             c == '(' ||
             c == ')' ||
             c == '{' ||
-            c == '}'
+            c == '}' ||
+            c == ';'
         );
     }
 
@@ -79,6 +80,29 @@ namespace compiler
     bool Lexer::_isDone() const
     {
         return _currentPos >= _input.length();
+    }
+
+    Token Lexer::_getSlashOrComment()
+    {
+        auto start = _currentPos;
+        int end = start;
+
+        if (_currentChar() == '/')
+        {
+            _forward();
+
+            while (_currentChar() != '\n' && _currentChar() != '\0')
+            {
+                _forward();
+                ++end;
+            }
+
+            return Token(Token::TokenKind::COMMENT);
+        }
+
+        // move backwards
+        _currentPos = start;
+        return Token(Token::TokenKind::SLASH);
     }
 
     Token Lexer::_getIdentifier()
@@ -139,8 +163,12 @@ namespace compiler
         {
             return Token(Token::TokenKind::OPEN_CURLY_BRACKET);
         }
-        
-        return Token(Token::TokenKind::CLOSE_CURLY_BRACKET);
+        else if (currentChar == '}')
+        {
+            return Token(Token::TokenKind::CLOSE_CURLY_BRACKET);
+        }
+
+        return Token(Token::TokenKind::SEMICOLON);
     }
 
     Token Lexer::_getArithmeticOperator()
@@ -161,7 +189,7 @@ namespace compiler
             return Token(Token::TokenKind::ASTERISK);
         }
 
-        return Token(Token::TokenKind::SLASH);
+        return _getSlashOrComment();
     }
 
     Token Lexer::_getNextToken()
