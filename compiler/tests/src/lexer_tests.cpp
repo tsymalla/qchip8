@@ -90,3 +90,23 @@ TEST_CASE("Lexer lexes multi-lines correctly")
     REQUIRE(tokens[6].getKind() == Token::TokenKind::PLUS);
     REQUIRE(tokens[7].getKind() == Token::TokenKind::NUMBER);
 }
+
+TEST_CASE("Lexer lexes keywords correctly")
+{
+    auto tokens = lexAndReturnNumberOfTokens(
+        "var i=5; // variable\n \
+        const j=3;");
+
+    REQUIRE(tokens.size() == 11);
+    REQUIRE(tokens[0].getKind() == Token::TokenKind::KEYWORD);
+    REQUIRE(tokens[1].getKind() == Token::TokenKind::ID);
+    REQUIRE(tokens[2].getKind() == Token::TokenKind::EQUAL);
+    REQUIRE(tokens[3].getKind() == Token::TokenKind::NUMBER);
+    REQUIRE(tokens[4].getKind() == Token::TokenKind::SEMICOLON);
+    REQUIRE(tokens[5].getKind() == Token::TokenKind::COMMENT);
+    REQUIRE(tokens[6].getKind() == Token::TokenKind::KEYWORD);
+    REQUIRE(tokens[7].getKind() == Token::TokenKind::ID);
+    REQUIRE(tokens[8].getKind() == Token::TokenKind::EQUAL);
+    REQUIRE(tokens[9].getKind() == Token::TokenKind::NUMBER);
+    REQUIRE(tokens[10].getKind() == Token::TokenKind::SEMICOLON);
+}

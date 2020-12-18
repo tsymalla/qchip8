@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <string>
+#include <string_view>
 #include <ostream>
 
 namespace compiler
@@ -10,6 +11,12 @@ namespace compiler
     class Token final
     {
     public:
+        struct NumberRange
+        {
+            size_t start;
+            size_t end;
+        };
+
         enum class TokenKind : size_t
         {
             NUMBER              = 0,
@@ -23,23 +30,27 @@ namespace compiler
             GREATER             = 8,
             GREATER_OR_EQUAL    = 9,
             EQUAL               = 10,
-            PLUS                = 11,
-            MINUS               = 12,
-            ASTERISK            = 13,
-            SLASH               = 14,
-            COMMA               = 15,
-            SEMICOLON           = 16,
-            COMMENT             = 17
+            COMPARE             = 11,
+            PLUS                = 12,
+            MINUS               = 13,
+            ASTERISK            = 14,
+            SLASH               = 15,
+            COMMA               = 16,
+            SEMICOLON           = 17,
+            COMMENT             = 18,
+            KEYWORD             = 19
         };
 
-        Token(TokenKind kind);
+        Token(TokenKind kind, size_t start, size_t end);
 
         TokenKind getKind() const;
         const char* getName() const;
+        NumberRange getRange() const;
 
         friend std::ostream& operator<<(std::ostream& rhs, const Token& token);
     private:
         TokenKind _kind;
+        NumberRange _range;
 
         constexpr static const char* TOKEN_NAMES[] =
         {
@@ -54,18 +65,31 @@ namespace compiler
             "GREATER",
             "GREATER_OR_EQUAL",
             "EQUAL",
+            "COMPARE",
             "PLUS",
             "MINUS",
             "ASTERISK",
             "SLASH",
             "COMMA",
             "SEMICOLON",
-            "COMMENT"
+            "COMMENT",
+            "KEYWORD"
         };
     };
 
     class Lexer final
     {
+        constexpr static const char* KEYWORDS[] =
+        {
+            "var",
+            "const",
+            "if",
+            "else",
+            "void",
+            "number",
+            "bool"
+        };
+
         std::string _input;
         std::vector<Token> _tokens;
         long _currentPos;
@@ -77,14 +101,17 @@ namespace compiler
         bool _isSpace(char c) const;
         bool _isSpecialCharacter(char c) const;
         bool _isArithmeticOperator(char c) const;
+        bool _isComparator(char c) const;
+        bool _isKeyword(std::string_view identifier) const;
         bool _isDone() const;
 
         Token _getSlashOrComment();
         Token _getIdentifier();
         Token _getNumber();
-        Token _getKeyword();
         Token _getSpecialCharacter();
         Token _getArithmeticOperator();
+        Token _getComparator();
+        Token _getKeyword();
 
         Token _getNextToken();
     public:
