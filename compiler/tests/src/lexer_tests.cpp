@@ -12,9 +12,10 @@ static auto lexAndReturnNumberOfTokens(std::string input)
     compiler::Lexer lexer(std::move(input));
     auto result = lexer.Lex();
 
+    std::cout << std::endl << "Tokens:" << std::endl;
     for (const auto& token: result)
     {
-        std::cout << token << " ";
+        std::cout << "\t *** " << token << std::endl;
     }
 
     std::cout << std::endl << "-------" << std::endl;
