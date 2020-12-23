@@ -11,7 +11,8 @@ INCLUDE_DIRECTORIES(includes)
 
 ADD_LIBRARY(${PROJECT_NAME} STATIC
     src/lexer.cpp
-    includes/lexer.h
-)
+    includes/lexer.hpp
+    includes/parser.hpp
+    src/parser.cpp)
 
 ADD_SUBDIRECTORY(tests)
