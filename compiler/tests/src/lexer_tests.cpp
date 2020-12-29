@@ -1,7 +1,7 @@
 #define CATCH_CONFIG_RUNNER
 #include <catch2/catch2.hpp>
 
-#include <lexer.h>
+#include <lexer.hpp>
 #include <iostream>
 
 using compiler::Token;
