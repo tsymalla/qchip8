@@ -87,7 +87,8 @@ namespace compiler
             "else",
             "void",
             "number",
-            "bool"
+            "bool",
+            "return"
         };
 
         std::string _input;
