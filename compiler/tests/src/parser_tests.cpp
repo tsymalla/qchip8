@@ -14,7 +14,7 @@ static bool parseInput(std::string input)
     auto result = lexer.Lex();
 
     compiler::Parser parser(result);
-    
+
     return parser.Parse();
 }
 

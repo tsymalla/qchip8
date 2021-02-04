@@ -3,17 +3,17 @@
 
 namespace compiler
 {
-	Parser::Parser(const std::vector<Token>& tokens) : _tokens{ tokens }, _tokenIndex { -1 }
-	{
-		if (!_tokens.empty())
-		{
-			_tokenIndex = 0;
-		}
-	}
+    Parser::Parser(const std::vector<Token>& tokens) : _tokens{ tokens }, _tokenIndex { -1 }
+    {
+        if (!_tokens.empty())
+        {
+            _tokenIndex = 0;
+        }
+    }
 
-	bool Parser::Parse()
-	{
-	    if (!_parseProgram())
+    bool Parser::Parse()
+    {
+        if (!_parseProgram())
         {
             if (!_errors.empty())
             {
@@ -27,29 +27,29 @@ namespace compiler
             }
         }
 
-	    return true;
-	}
+        return true;
+    }
 
     bool Parser::_hasToken() const
     {
-	    return _tokenIndex < _tokens.size();
+        return _tokenIndex < _tokens.size();
     }
 
-	Token Parser::_getCurrentToken() const
-	{
-		// TODO: How to handle out of range exceptions?
-		if (_tokenIndex < _tokens.size())
-		{
-			return _tokens[_tokenIndex];
-		}
-	}
+    Token Parser::_getCurrentToken() const
+    {
+        // TODO: How to handle out of range exceptions?
+        if (_tokenIndex < _tokens.size())
+        {
+            return _tokens[_tokenIndex];
+        }
+    }
 
     bool Parser::_match(Token::TokenKind tokenKind)
     {
-	    if (!_hasToken())
+        if (!_hasToken())
         {
             _handleEndOfInput(tokenKind);
-	        return false;
+            return false;
         }
 
         const Token& token = _getCurrentToken();
@@ -65,30 +65,30 @@ namespace compiler
     }
 
     bool Parser::_match(Token::TokenKind tokenKind, std::string_view lexeme)
-	{
+    {
         if (!_hasToken())
         {
             _handleEndOfInput(tokenKind, lexeme);
             return false;
         }
 
-	    const Token& token = _getCurrentToken();
-		if (token.getKind() != tokenKind && token.getLexeme() != lexeme)
-		{
+        const Token& token = _getCurrentToken();
+        if (token.getKind() != tokenKind && token.getLexeme() != lexeme)
+        {
             _handleError(token, lexeme);
             return false;
-		}
+        }
 
         ++_tokenIndex;
 
-		return true;
-	}
+        return true;
+    }
 
     bool Parser::_parseProgram()
     {
-	    return  _match(Token::TokenKind::KEYWORD, "program") &&
+        return  _match(Token::TokenKind::KEYWORD, "program") &&
                 _match(Token::TokenKind::ID) &&
-	            _parseBlock();
+                _parseBlock();
     }
 
     bool Parser::_parseBlock()
@@ -101,40 +101,40 @@ namespace compiler
     bool Parser::_parseStatements()
     {
         return  (_parseSingleStatement() &&
-                _parseStatements()) ||
+                 _parseStatements()) ||
                 _parseEmptyBlock();
     }
 
     bool Parser::_parseSingleStatement()
     {
-	    const auto& token = _getCurrentToken();
-	    if (token.getKind() == Token::TokenKind::ID)
+        const auto& token = _getCurrentToken();
+        if (token.getKind() == Token::TokenKind::ID)
         {
             return _parseAssignment();
         }
-	    else if (token.getKind() == Token::TokenKind::KEYWORD)
+        else if (token.getKind() == Token::TokenKind::KEYWORD)
         {
-	        if (token.getLexeme() == "if")
+            if (token.getLexeme() == "if")
             {
-	            return _parseConditional();
+                return _parseConditional();
             }
-	        else if (token.getLexeme() == "while")
+            else if (token.getLexeme() == "while")
             {
                 return _parseLoop();
             }
-	        else if (token.getLexeme() == "call")
+            else if (token.getLexeme() == "call")
             {
-	            // TODO
+                // TODO
                 return _parseFunctionCall();
             }
         }
 
-	    return false;
+        return false;
     }
 
     bool Parser::_parseAssignment()
     {
-	    // TODO use value here.
+        // TODO use value here.
         return  _match(Token::TokenKind::ID) &&
                 _match(Token::TokenKind::EQUAL) &&
                 _match(Token::TokenKind::NUMBER) &&
@@ -143,12 +143,12 @@ namespace compiler
 
     bool Parser::_parseConditional()
     {
-	    return false;
+        return false;
     }
 
     bool Parser::_parseLoop()
     {
-	    return  _match(Token::TokenKind::KEYWORD, "while") &&
+        return  _match(Token::TokenKind::KEYWORD, "while") &&
                 _match(Token::TokenKind::OPEN_PARENTHESIS) &&
                 _match(Token::TokenKind::ID) &&
                 _match(Token::TokenKind::COMPARE) &&
