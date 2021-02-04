@@ -32,15 +32,6 @@ TEST_CASE("Lexer lexes numbers correctly")
     REQUIRE(tokens[2].getKind() == Token::TokenKind::ID);
 }
 
-TEST_CASE("Lexer lexes identifiers correctly")
-{
-    auto tokens = lexAndReturnNumberOfTokens("23455,abcd");
-    REQUIRE(tokens.size() == 3);
-    REQUIRE(tokens[0].getKind() == Token::TokenKind::NUMBER);
-    REQUIRE(tokens[1].getKind() == Token::TokenKind::COMMA);
-    REQUIRE(tokens[2].getKind() == Token::TokenKind::ID);
-}
-
 TEST_CASE("Lexer lexes spaces correctly")
 {
     auto tokens = lexAndReturnNumberOfTokens("    23455    ,    abcd");
@@ -110,4 +101,18 @@ TEST_CASE("Lexer lexes keywords correctly")
     REQUIRE(tokens[8].getKind() == Token::TokenKind::EQUAL);
     REQUIRE(tokens[9].getKind() == Token::TokenKind::NUMBER);
     REQUIRE(tokens[10].getKind() == Token::TokenKind::SEMICOLON);
+}
+
+TEST_CASE("Lexer lexes identifiers correctly")
+{
+    auto tokens = lexAndReturnNumberOfTokens((
+            "var i123=5;"
+    ));
+
+    REQUIRE(tokens.size() == 5);
+    REQUIRE(tokens[0].getKind() == Token::TokenKind::KEYWORD);
+    REQUIRE(tokens[1].getKind() == Token::TokenKind::ID);
+    REQUIRE(tokens[2].getKind() == Token::TokenKind::EQUAL);
+    REQUIRE(tokens[3].getKind() == Token::TokenKind::NUMBER);
+    REQUIRE(tokens[4].getKind() == Token::TokenKind::SEMICOLON);
 }
