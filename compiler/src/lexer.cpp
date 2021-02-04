@@ -34,6 +34,10 @@ namespace compiler
         return _lexeme;
     }
 
+    const char *Token::getNameFromTokenKind(const Token::TokenKind kind) {
+        return TOKEN_NAMES[static_cast<size_t>(kind)];
+    }
+
     Lexer::Lexer(std::string input):
         _input{std::move(input)},
         _currentPos{0}

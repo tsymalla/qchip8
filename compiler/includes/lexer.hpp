@@ -43,6 +43,7 @@ namespace compiler
 
         Token(TokenKind kind, std::string_view content, size_t start, size_t end);
 
+        static const char* getNameFromTokenKind(const TokenKind tokenKind);
         TokenKind getKind() const;
         const char* getName() const;
         std::string getLexeme() const;

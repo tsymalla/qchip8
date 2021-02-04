@@ -25,14 +25,19 @@ namespace compiler
 		std::vector<Token> _tokens;
 		std::vector<std::string> _errors;
 
+		bool _hasToken() const;
 		Token _getCurrentToken() const;
 
-		void _match(Token::TokenKind tokenKind);
+        void _match(Token::TokenKind tokenKind);
+		void _match(Token::TokenKind tokenKind, std::string_view lexeme);
+		void _parseProgram();
+		void _parseStatements();
 		void _parseExpression();
 		void _parseConstant();
 		void _parseStringLiteral();
 
-		void _handleError(Token token);
+		void _handleError(Token token, std::string_view lexeme = "");
+		void _handleEndOfInput(Token::TokenKind tokenKind, std::string_view lexeme = "");
 
 	public:
 		Parser(const std::vector<Token>& tokens);
@@ -42,7 +47,7 @@ namespace compiler
 		Parser(Parser&&) = delete;
 		Parser& operator=(Parser&&) = delete;
 
-		void Parse();
+		bool Parse();
 	};
 }
 

@@ -11,6 +11,7 @@ INCLUDE_DIRECTORIES(external)
 ADD_EXECUTABLE(${PROJECT_NAME}
  external/catch2/catch2.cpp
  src/lexer_tests.cpp
+ src/parser_tests.cpp
 )
 
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} compiler)
