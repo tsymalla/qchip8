@@ -28,16 +28,20 @@ namespace compiler
 		bool _hasToken() const;
 		Token _getCurrentToken() const;
 
-        void _match(Token::TokenKind tokenKind);
-		void _match(Token::TokenKind tokenKind, std::string_view lexeme);
-		void _parseProgram();
-		void _parseStatements();
-		void _parseExpression();
-		void _parseConstant();
-		void _parseStringLiteral();
+        bool _match(Token::TokenKind tokenKind);
+		bool _match(Token::TokenKind tokenKind, std::string_view lexeme);
+        bool _parseProgram();
+        bool _parseBlock();
+        bool _parseStatements();
+        bool _parseSingleStatement();
+        bool _parseAssignment();
+        bool _parseConditional();
+        bool _parseLoop();
+        bool _parseFunctionCall();
+        bool _parseEmptyBlock() const;
 
-		void _handleError(Token token, std::string_view lexeme = "");
-		void _handleEndOfInput(Token::TokenKind tokenKind, std::string_view lexeme = "");
+        void _handleError(Token token, std::string_view lexeme = "");
+        void _handleEndOfInput(Token::TokenKind tokenKind, std::string_view lexeme = "");
 
 	public:
 		Parser(const std::vector<Token>& tokens);

@@ -13,17 +13,18 @@ namespace compiler
 
 	bool Parser::Parse()
 	{
-	    _parseProgram();
-
-	    if (!_errors.empty())
+	    if (!_parseProgram())
         {
-	        std::cout << "Gathered " << _errors.size() << " parsing errors:" << std::endl;
-	        for (const auto& err: _errors)
+            if (!_errors.empty())
             {
-	            std::cout << err << std::endl;
-            }
+                std::cout << "Gathered " << _errors.size() << " parsing errors:" << std::endl;
+                for (const auto& err: _errors)
+                {
+                    std::cout << err << std::endl;
+                }
 
-	        return false;
+                return false;
+            }
         }
 
 	    return true;
@@ -43,71 +44,134 @@ namespace compiler
 		}
 	}
 
-    void Parser::_match(Token::TokenKind tokenKind)
+    bool Parser::_match(Token::TokenKind tokenKind)
     {
 	    if (!_hasToken())
         {
             _handleEndOfInput(tokenKind);
-	        return;
+	        return false;
         }
 
         const Token& token = _getCurrentToken();
         if (token.getKind() != tokenKind)
         {
             _handleError(token, "");
+            return false;
         }
 
         ++_tokenIndex;
+
+        return true;
     }
 
-    void Parser::_match(Token::TokenKind tokenKind, std::string_view lexeme)
+    bool Parser::_match(Token::TokenKind tokenKind, std::string_view lexeme)
 	{
         if (!_hasToken())
         {
             _handleEndOfInput(tokenKind, lexeme);
-            return;
+            return false;
         }
 
 	    const Token& token = _getCurrentToken();
 		if (token.getKind() != tokenKind && token.getLexeme() != lexeme)
 		{
             _handleError(token, lexeme);
+            return false;
 		}
 
         ++_tokenIndex;
+
+		return true;
 	}
 
-    void Parser::_parseProgram()
+    bool Parser::_parseProgram()
     {
-	    _match(Token::TokenKind::KEYWORD, "program");
-	    _match(Token::TokenKind::ID);
-	    _match(Token::TokenKind::OPEN_CURLY_BRACKET);
-	    _parseStatements();
-        _match(Token::TokenKind::CLOSE_CURLY_BRACKET);
+	    return  _match(Token::TokenKind::KEYWORD, "program") &&
+                _match(Token::TokenKind::ID) &&
+	            _parseBlock();
     }
 
-    void Parser::_parseStatements()
+    bool Parser::_parseBlock()
     {
-
+        return  _match(Token::TokenKind::OPEN_CURLY_BRACKET) &&
+                _parseStatements() &&
+                _match(Token::TokenKind::CLOSE_CURLY_BRACKET);
     }
 
-	void Parser::_parseExpression()
-	{
-	}
+    bool Parser::_parseStatements()
+    {
+        return  (_parseSingleStatement() &&
+                _parseStatements()) ||
+                _parseEmptyBlock();
+    }
 
-	void Parser::_parseConstant()
-	{
-	}
+    bool Parser::_parseSingleStatement()
+    {
+	    const auto& token = _getCurrentToken();
+	    if (token.getKind() == Token::TokenKind::ID)
+        {
+            return _parseAssignment();
+        }
+	    else if (token.getKind() == Token::TokenKind::KEYWORD)
+        {
+	        if (token.getLexeme() == "if")
+            {
+	            return _parseConditional();
+            }
+	        else if (token.getLexeme() == "while")
+            {
+                return _parseLoop();
+            }
+	        else if (token.getLexeme() == "call")
+            {
+	            // TODO
+                return _parseFunctionCall();
+            }
+        }
 
-	void Parser::_parseStringLiteral()
-	{
-	}
+	    return false;
+    }
+
+    bool Parser::_parseAssignment()
+    {
+	    // TODO use value here.
+        return  _match(Token::TokenKind::ID) &&
+                _match(Token::TokenKind::EQUAL) &&
+                _match(Token::TokenKind::NUMBER) &&
+                _match(Token::TokenKind::SEMICOLON);
+    }
+
+    bool Parser::_parseConditional()
+    {
+	    return false;
+    }
+
+    bool Parser::_parseLoop()
+    {
+	    return  _match(Token::TokenKind::KEYWORD, "while") &&
+                _match(Token::TokenKind::OPEN_PARENTHESIS) &&
+                _match(Token::TokenKind::ID) &&
+                _match(Token::TokenKind::COMPARE) &&
+                _match(Token::TokenKind::NUMBER) &&
+                _match(Token::TokenKind::CLOSE_PARENTHESIS) &&
+                _parseBlock();
+    }
+
+    bool Parser::_parseFunctionCall()
+    {
+	    return false;
+    }
+
+    bool Parser::_parseEmptyBlock() const
+    {
+        return true;
+    }
 
 	void Parser::_handleError(Token token, std::string_view lexeme)
 	{
 	    if (lexeme == "")
         {
-            _errors.push_back(std::string("Parse error: Expected ") + token.getLexeme());
+            _errors.push_back(std::string("Parse error: Expected ") + token.getName());
 	        return;
         }
 

@@ -244,17 +244,9 @@ namespace compiler
         _forward();
 
         Token::TokenKind kind;
-        if (currentChar == '+')
+        if (currentChar == '<' || currentChar == '>')
         {
-            kind = Token::TokenKind::GREATER;
-        }
-        else if (currentChar == '-')
-        {
-            kind = Token::TokenKind::LESS;
-        }
-        else if (currentChar == '*')
-        {
-            kind = Token::TokenKind::EQUAL;
+            kind = Token::TokenKind::COMPARE;
         }
 
         return Token(kind, _input, start, start + 1);
