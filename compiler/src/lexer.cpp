@@ -8,10 +8,11 @@ namespace compiler
         return rhs;
     }
 
-    Token::Token(Token::TokenKind kind, size_t start, size_t end) :
+    Token::Token(Token::TokenKind kind, std::string_view content, size_t start, size_t end) :
         _kind{ kind },
         _range{ start, end }
     {
+        _lexeme = content.substr(start, end - start);
     }
 
     Token::TokenKind Token::getKind() const
@@ -27,6 +28,10 @@ namespace compiler
     Token::NumberRange Token::getRange() const
     {
         return _range;
+    }
+
+    std::string Token::getLexeme() const {
+        return _lexeme;
     }
 
     Lexer::Lexer(std::string input):
@@ -118,12 +123,12 @@ namespace compiler
                 ++end;
             }
 
-            return Token(Token::TokenKind::COMMENT, start, end);
+            return Token(Token::TokenKind::COMMENT, _input, start, end);
         }
 
         // move backwards
         _currentPos = start;
-        return Token(Token::TokenKind::SLASH, start - 1, end);
+        return Token(Token::TokenKind::SLASH, _input, start - 1, end);
     }
 
     Token Lexer::_getIdentifier()
@@ -143,10 +148,10 @@ namespace compiler
 
         if (_isKeyword(identifier))
         {
-            return Token(Token::TokenKind::KEYWORD, start, end + 1);
+            return Token(Token::TokenKind::KEYWORD, _input, start, end + 1);
         }
 
-        return Token(Token::TokenKind::ID, start, end + 1);
+        return Token(Token::TokenKind::ID, _input, start, end + 1);
     }
 
     Token Lexer::_getNumber()
@@ -162,14 +167,12 @@ namespace compiler
             _forward();
         }
 
-        int number = std::stoi(_input.substr(start, end + 1));
-
-        return Token(Token::TokenKind::NUMBER, start, end);
+        return Token(Token::TokenKind::NUMBER, _input, start, end);
     }
 
     Token Lexer::_getKeyword()
     {
-        return Token(Token::TokenKind::GREATER, 0, 0);
+        return Token(Token::TokenKind::GREATER, _input, 0, 0);
     }
 
     Token Lexer::_getSpecialCharacter()
@@ -205,7 +208,7 @@ namespace compiler
             kind = Token::TokenKind::SEMICOLON;
         }
 
-        return Token(kind, start, start + 1);
+        return Token(kind, _input, start, start + 1);
     }
 
     Token Lexer::_getArithmeticOperator()
@@ -216,15 +219,15 @@ namespace compiler
 
         if (currentChar == '+')
         {
-            return Token(Token::TokenKind::PLUS, start, start + 1);
+            return Token(Token::TokenKind::PLUS, _input, start, start + 1);
         }
         else if (currentChar == '-')
         {
-            return Token(Token::TokenKind::MINUS, start, start + 1);
+            return Token(Token::TokenKind::MINUS, _input, start, start + 1);
         }
         else if (currentChar == '*')
         {
-            return Token(Token::TokenKind::ASTERISK, start, start + 1);
+            return Token(Token::TokenKind::ASTERISK, _input, start, start + 1);
         }
 
         return _getSlashOrComment();
@@ -250,7 +253,7 @@ namespace compiler
             kind = Token::TokenKind::EQUAL;
         }
 
-        return Token(kind, start, start + 1);
+        return Token(kind, _input, start, start + 1);
     }
 
     Token Lexer::_getNextToken()
@@ -286,7 +289,7 @@ namespace compiler
         }
 
         _forward();
-        return Token(Token::TokenKind::COMMA, _currentPos, _currentPos + 1);
+        return Token(Token::TokenKind::COMMA, _input, _currentPos, _currentPos + 1);
     }
 
     std::vector<Token> Lexer::Lex()

@@ -41,15 +41,17 @@ namespace compiler
             KEYWORD             = 19
         };
 
-        Token(TokenKind kind, size_t start, size_t end);
+        Token(TokenKind kind, std::string_view content, size_t start, size_t end);
 
         TokenKind getKind() const;
         const char* getName() const;
+        std::string getLexeme() const;
         NumberRange getRange() const;
 
         friend std::ostream& operator<<(std::ostream& rhs, const Token& token);
     private:
         TokenKind _kind;
+        std::string _lexeme;
         NumberRange _range;
 
         constexpr static const char* TOKEN_NAMES[] =
@@ -81,6 +83,7 @@ namespace compiler
     {
         constexpr static const char* KEYWORDS[] =
         {
+            "program",
             "var",
             "const",
             "if",
@@ -88,6 +91,7 @@ namespace compiler
             "void",
             "number",
             "bool",
+            "while",
             "return"
         };
 
