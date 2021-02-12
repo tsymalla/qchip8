@@ -53,3 +53,11 @@ TEST_CASE("Parser is able to parse a multi-line program")
         }\n \
     }"));
 }
+
+TEST_CASE("Parser is able to determine a invalid loop")
+{
+    CHECK(!parseInput("program test\n \
+    {\n \
+        while (x > y) {} \n \
+    }"));
+}
