@@ -24,6 +24,7 @@ namespace compiler
 		int _tokenIndex;
 		std::vector<Token> _tokens;
 		std::vector<std::string> _errors;
+		const Token NullToken{Token::TokenKind::UNDEFINED, "", 0, 0};
 
 		bool _hasToken() const;
 		Token _getCurrentToken() const;
@@ -40,7 +41,7 @@ namespace compiler
         bool _parseFunctionCall();
         bool _parseEmptyBlock() const;
 
-        void _handleError(Token token, std::string_view lexeme = "");
+        void _handleError(Token token, Token::TokenKind tokenKind, std::string_view lexeme = "");
         void _handleEndOfInput(Token::TokenKind tokenKind, std::string_view lexeme = "");
 
 	public:

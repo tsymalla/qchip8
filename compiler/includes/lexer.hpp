@@ -38,7 +38,8 @@ namespace compiler
             COMMA               = 16,
             SEMICOLON           = 17,
             COMMENT             = 18,
-            KEYWORD             = 19
+            KEYWORD             = 19,
+            UNDEFINED			= 20
         };
 
         Token(TokenKind kind, std::string_view content, size_t start, size_t end);
@@ -76,7 +77,8 @@ namespace compiler
             "COMMA",
             "SEMICOLON",
             "COMMENT",
-            "KEYWORD"
+            "KEYWORD",
+            "UNDEFINED"
         };
     };
 

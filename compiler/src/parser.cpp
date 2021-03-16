@@ -37,11 +37,12 @@ namespace compiler
 
 	Token Parser::_getCurrentToken() const
 	{
-		// TODO: How to handle out of range exceptions?
-		if (_tokenIndex < _tokens.size())
+		if (_tokenIndex > -1 && _tokenIndex < _tokens.size())
 		{
 			return _tokens[_tokenIndex];
 		}
+
+		return NullToken;
 	}
 
 	bool Parser::_match(Token::TokenKind tokenKind)
@@ -55,7 +56,7 @@ namespace compiler
 		const Token& token = _getCurrentToken();
 		if (token.getKind() != tokenKind)
 		{
-			_handleError(token, "");
+			_handleError(token, tokenKind, "");
 			return false;
 		}
 
@@ -75,7 +76,7 @@ namespace compiler
 		const Token& token = _getCurrentToken();
 		if (token.getKind() != tokenKind && token.getLexeme() != lexeme)
 		{
-			_handleError(token, lexeme);
+			_handleError(token, tokenKind, lexeme);
 			return false;
 		}
 
@@ -100,9 +101,17 @@ namespace compiler
 
 	bool Parser::_parseStatements()
 	{
-		return  (_parseSingleStatement() &&
-				 _parseStatements()) ||
-				_parseEmptyBlock();
+		if (_parseSingleStatement())
+		{
+			if (_parseStatements())
+			{
+				return true;
+			}
+
+			return false;
+		}
+
+		return _parseEmptyBlock();
 	}
 
 	bool Parser::_parseSingleStatement()
@@ -167,11 +176,11 @@ namespace compiler
 		return true;
 	}
 
-	void Parser::_handleError(Token token, std::string_view lexeme)
+	void Parser::_handleError(Token token, Token::TokenKind tokenKind, std::string_view lexeme)
 	{
 		if (lexeme == "")
 		{
-			_errors.push_back(std::string("Parse error: Expected ") + token.getName());
+			_errors.push_back(std::string("Parse error: Expected ") + Token::getNameFromTokenKind(tokenKind));
 			return;
 		}
 
