@@ -161,14 +161,16 @@ void MainWindow::on_actionTake_screenshot_triggered()
 	QImage currentBuffer = _framebuffer;
 
 	const auto file = QFileDialog::getSaveFileName(this, "Select file", QDir::homePath(), "Image files (*.png *.jpg *.bmp)");
-	const auto result = currentBuffer.save(file);
 
-	if (result)
-	{
-		QMessageBox::information(this, "Success", QString("The screenshot was taken and saved to %1.").arg(file));
-	}
-	else
-	{
-		QMessageBox::warning(this, "Failure", QString("Could not save to %1.").arg(file));
-	}
+    if (!file.isEmpty())
+    {
+        if (currentBuffer.save(file))
+        {
+            QMessageBox::information(this, "Success", QString("The screenshot was taken and saved to %1.").arg(file));
+        }
+        else
+        {
+            QMessageBox::warning(this, "Failure", QString("Could not save to %1.").arg(file));
+        }
+    }
 }

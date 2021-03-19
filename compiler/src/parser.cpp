@@ -146,7 +146,7 @@ namespace compiler
 		// TODO use value here.
 		return  _match(Token::TokenKind::ID) &&
 				_match(Token::TokenKind::EQUAL) &&
-                _match(Token::TokenKind::VALUE) &&
+                _match(Token::TokenKind::NUMBER) &&
 				_match(Token::TokenKind::SEMICOLON);
 	}
 
