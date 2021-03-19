@@ -2,22 +2,58 @@
 #define PARSER_HPP
 
 #include <lexer.hpp>
+#include <vector>
 
 namespace compiler
 {
-	struct AstNode
+/*
+    class AstNode
 	{
+    public:
+        virtual void GenerateCode() = 0;
 	};
 
-	struct AstBinaryNode
-	{
+    class AstRootNode: public AstNode
+    {
+        std::vector<AstRootNode*> children;
 
-	};
+        // AstNode interface
+    public:
+        void GenerateCode() override;
+    };
 
-	struct AstUnaryNode
-	{
+    class AstBinaryNode: public AstNode
+    {
+        Variable a;
+        Variable b;
+        Operator operator;
 
-	};
+        // AstNode interface
+        public:
+            void GenerateCode() override;
+    };
+
+    class AstComparatorNode: public AstNode
+    {
+        AstBinaryNode* Comparator = nullptr;
+        AstNode* If = nullptr;
+        AstNode* Else = nullptr;
+
+        // AstNode interface
+    public:
+        void GenerateCode() override;
+    };
+
+    class AstWhileNode: public AstNode
+    {
+        AstBinaryNode* Comparator = nullptr;
+        AstRootNode* Body = nullptr;
+
+        // AstNode interface
+    public:
+        void GenerateCode() override;
+    };
+*/
 
 	class Parser final
 	{

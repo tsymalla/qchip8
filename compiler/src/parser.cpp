@@ -3,7 +3,7 @@
 
 namespace compiler
 {
-	Parser::Parser(const std::vector<Token>& tokens) : _tokens{ tokens }, _tokenIndex { -1 }
+    Parser::Parser(const std::vector<Token>& tokens) : _tokenIndex { -1 }, _tokens{ tokens }
 	{
 		if (!_tokens.empty())
 		{
@@ -146,7 +146,7 @@ namespace compiler
 		// TODO use value here.
 		return  _match(Token::TokenKind::ID) &&
 				_match(Token::TokenKind::EQUAL) &&
-				_match(Token::TokenKind::NUMBER) &&
+                _match(Token::TokenKind::VALUE) &&
 				_match(Token::TokenKind::SEMICOLON);
 	}
 
