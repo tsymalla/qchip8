@@ -11,7 +11,7 @@ namespace compiler
 		}
 	}
 
-	bool Parser::Parse()
+	ExprNodePtr Parser::Parse()
 	{
 		if (!_parseProgram())
 		{
@@ -23,11 +23,11 @@ namespace compiler
 					std::cout << err << std::endl;
 				}
 
-				return false;
+				return nullptr;
 			}
 		}
 
-		return true;
+		return std::make_unique<VariableNode>("hi");
 	}
 
 	bool Parser::_hasToken() const

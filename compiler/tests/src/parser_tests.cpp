@@ -15,7 +15,7 @@ static bool parseInput(std::string input)
 
 	compiler::Parser parser(result);
 
-	return parser.Parse();
+	return parser.Parse() != nullptr;
 }
 
 TEST_CASE("Parser is able to parse a simple program without statements")
