@@ -5,12 +5,14 @@
 #include <string>
 #include <string_view>
 #include <ostream>
+#include <variant>
 
 namespace compiler
 {
     class Token final
     {
     public:
+        using ValueType = std::variant<std::monostate, int, double, const char*>;
         struct NumberRange
         {
             size_t start;
@@ -42,18 +44,25 @@ namespace compiler
             UNDEFINED			= 20
         };
 
-        Token(TokenKind kind, std::string_view content, size_t start, size_t end);
+        explicit Token(TokenKind kind, std::string_view content, size_t start, size_t end, const ValueType& value = std::monostate());
+
+        static Token MakeToken(TokenKind kind, std::string_view content, size_t start, size_t end, const ValueType& value = std::monostate())
+        {
+            return Token{kind, content, start, end, value};
+        }
 
         static const char* getNameFromTokenKind(const TokenKind tokenKind);
         TokenKind getKind() const;
         const char* getName() const;
         std::string getLexeme() const;
+        ValueType getValue() const;
         NumberRange getRange() const;
 
         friend std::ostream& operator<<(std::ostream& rhs, const Token& token);
     private:
         TokenKind _kind;
         std::string _lexeme;
+        ValueType _value;
         NumberRange _range;
 
         constexpr static const char* TOKEN_NAMES[] =
