@@ -10,6 +10,8 @@ QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
 
+class EditorWindow;
+
 class MainWindow : public QMainWindow
 {
 	Q_OBJECT
@@ -37,6 +39,8 @@ private slots:
 
 	void on_actionTake_screenshot_triggered();
 
+    void on_actionCreate_new_ROM_triggered();
+
 signals:
 	void stopEmulation();
 
@@ -44,6 +48,7 @@ private:
 	Ui::MainWindow* ui;
 	QThread* _emulatorThread;
 	EmulatorWorker* _emulatorWorker;
+    EditorWindow* _editorWindow;
 	QString _lastFile;
 	QImage _framebuffer;
 

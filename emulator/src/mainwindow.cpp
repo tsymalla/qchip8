@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 #include "./ui_mainwindow.h"
+#include "editorwindow.h"
 #include <QFileDialog>
 #include <QKeyEvent>
 
@@ -7,9 +8,11 @@ MainWindow::MainWindow(QWidget* parent)
 	: QMainWindow(parent)
 	, ui(new Ui::MainWindow),
 	_emulatorThread(nullptr),
-	_emulatorWorker(nullptr)
+    _emulatorWorker(nullptr)
 {
 	ui->setupUi(this);
+
+    _editorWindow = new EditorWindow(this);
 }
 
 MainWindow::~MainWindow()
@@ -173,4 +176,9 @@ void MainWindow::on_actionTake_screenshot_triggered()
             QMessageBox::warning(this, "Failure", QString("Could not save to %1.").arg(file));
         }
     }
+}
+
+void MainWindow::on_actionCreate_new_ROM_triggered()
+{
+    _editorWindow->show();
 }

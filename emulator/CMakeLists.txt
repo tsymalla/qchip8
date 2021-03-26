@@ -18,14 +18,17 @@ INCLUDE_DIRECTORIES(includes)
 
 ADD_EXECUTABLE(${PROJECT_NAME}
     src/mainwindow.ui
+    src/editorwindow.ui
     src/main.cpp
     src/mainwindow.cpp
+    src/editorwindow.cpp
     src/cpu.cpp
     src/registerset.cpp
     src/is.cpp
     src/memory.cpp
     src/emulatorworker.cpp
     includes/mainwindow.h
+    includes/editorwindow.h
     includes/cpu.h
     includes/is.h
     includes/memory.h
@@ -34,4 +37,5 @@ ADD_EXECUTABLE(${PROJECT_NAME}
     includes/registerset.h
 )
 
-TARGET_LINK_LIBRARIES(${PROJECT_NAME} PRIVATE Qt5::Widgets)
+TARGET_INCLUDE_DIRECTORIES(${PROJECT_NAME} PUBLIC "../compiler/includes")
+TARGET_LINK_LIBRARIES(${PROJECT_NAME} PRIVATE Qt5::Widgets compiler)
