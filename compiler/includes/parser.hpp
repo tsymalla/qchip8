@@ -4,6 +4,7 @@
 #include <lexer.hpp>
 #include <ast.hpp>
 #include <vector>
+#include <utility>
 
 namespace compiler
 {
@@ -40,7 +41,7 @@ namespace compiler
 		Parser(Parser&&) = delete;
 		Parser& operator=(Parser&&) = delete;
 
-		ExprNodePtr Parse();
+        std::pair<ExprNodePtr, std::vector<std::string>> Parse();
 	};
 }
 

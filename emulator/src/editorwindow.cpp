@@ -1,6 +1,7 @@
 #include "editorwindow.h"
 #include "ui_editorwindow.h"
 #include <QString>
+#include <string>
 #include <lexer.hpp>
 #include <parser.hpp>
 
@@ -13,13 +14,18 @@ void EditorWindow::parseInput(std::string input)
 
     ui->lstLogOutput->clear();
 
-    if (parser.Parse() != nullptr)
+    const auto& parseResult = parser.Parse();
+    if (parseResult.first != nullptr)
     {
         ui->lstLogOutput->addItem(QString("Success!"));
     }
     else
     {
-        ui->lstLogOutput->addItem(QString("Failure."));
+        ui->lstLogOutput->addItem(QString("Failure:"));
+        for (const std::string& line: parseResult.second)
+        {
+            ui->lstLogOutput->addItem(QString::fromStdString(line));
+        }
     }
 }
 
