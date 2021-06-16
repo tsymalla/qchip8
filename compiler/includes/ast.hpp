@@ -14,6 +14,21 @@ namespace compiler
 
     using ExprNodePtr = std::unique_ptr<ExprNode>;
 
+    class TopLevelNode: public ExprNode
+    {
+    public:
+        explicit TopLevelNode(std::string name): _name{ std::move(name) }
+        {
+        }
+
+        void GenerateCode() override
+        {
+        }
+
+    private:
+        std::string _name;
+    };
+
     class VariableNode: public ExprNode
     {
     public:
@@ -27,6 +42,21 @@ namespace compiler
 
     private:
         std::string _name;
+    };
+
+    class UnaryNode: public ExprNode
+    {
+        explicit UnaryNode(ExprNodePtr node, char op):
+            _node{ std::move(node) },
+            _operator{ op }
+        {
+        }
+
+        void GenerateCode() override;
+
+    private:
+        ExprNodePtr _node;
+        char _operator;
     };
 
     class BinaryNode: public ExprNode

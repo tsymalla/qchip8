@@ -11,33 +11,31 @@ namespace compiler
 		}
 	}
 
-    std::pair<ExprNodePtr, std::vector<std::string>> Parser::Parse()
+    ParserState const* Parser::Parse()
 	{
 		if (!_parseProgram())
 		{
-			if (!_errors.empty())
+            if (_state.HasError())
 			{
-				std::cout << "Gathered " << _errors.size() << " parsing errors:" << std::endl;
-				for (const auto& err: _errors)
+                std::cout << "Compilation error: " << _state.GetErrorMessages().size() << " errors:" << std::endl;
+                for (const auto& error: _state.GetErrorMessages())
 				{
-					std::cout << err << std::endl;
+                    std::cout << error << std::endl;
 				}
-
-                return std::make_pair(nullptr, _errors);
 			}
 		}
 
-        return std::make_pair(std::make_unique<VariableNode>("hi"), _errors);
+        return &_state;
 	}
 
 	bool Parser::_hasToken() const
 	{
-		return _tokenIndex < _tokens.size();
+        return _tokenIndex < static_cast<int>(_tokens.size());
 	}
 
 	Token Parser::_getCurrentToken() const
 	{
-		if (_tokenIndex > -1 && _tokenIndex < _tokens.size())
+        if (_tokenIndex > -1 && _hasToken())
 		{
 			return _tokens[_tokenIndex];
 		}
@@ -85,11 +83,42 @@ namespace compiler
 		return true;
 	}
 
+    Token Parser::_peek() const
+    {
+        if (!_hasToken())
+        {
+            return NullToken;
+        }
+
+        return _getCurrentToken();
+    }
+
+    void Parser::_advance()
+    {
+        ++_tokenIndex;
+    }
+
+	bool Parser::_parseID()
+	{
+		Token nextToken = _peek();
+		if (nextToken.getKind() == Token::TokenKind::ID)
+		{
+			_advance();
+			_state.SetAstRoot(std::make_unique<TopLevelNode>(nextToken.getLexeme()));
+			return true;
+		}
+
+		return false;
+	}
+
 	bool Parser::_parseProgram()
 	{
-		return  _match(Token::TokenKind::KEYWORD, "program") &&
-				_match(Token::TokenKind::ID) &&
-				_parseBlock();
+        if (_match(Token::TokenKind::KEYWORD, "program"))
+        {
+			return _parseID() && _parseBlock();
+        }
+
+        return false;
 	}
 
 	bool Parser::_parseBlock()
@@ -144,10 +173,15 @@ namespace compiler
 	bool Parser::_parseAssignment()
 	{
 		// TODO use value here.
-		return  _match(Token::TokenKind::ID) &&
+		if (_parseID())
+		{
+			return
 				_match(Token::TokenKind::EQUAL) &&
-                _match(Token::TokenKind::NUMBER) &&
+				_match(Token::TokenKind::NUMBER) &&
 				_match(Token::TokenKind::SEMICOLON);
+		}
+
+		return false;
 	}
 
 	bool Parser::_parseConditional()
@@ -180,21 +214,21 @@ namespace compiler
 	{
 		if (lexeme == "")
 		{
-			_errors.push_back(std::string("Parse error: Expected ") + Token::getNameFromTokenKind(tokenKind));
+            _state.AddError(std::string("Parse error: Expected ") + Token::getNameFromTokenKind(tokenKind));
 			return;
 		}
 
-		_errors.push_back(std::string("Parse error: Got ") + token.getLexeme() + ", expected: " + std::string(lexeme));
+        _state.AddError(std::string("Parse error: Got ") + token.getLexeme() + ", expected: " + std::string(lexeme));
 	}
 
 	void Parser::_handleEndOfInput(Token::TokenKind tokenKind, std::string_view lexeme)
 	{
 		if (lexeme == "")
 		{
-			_errors.push_back(std::string("Determined end of input: Expected ") + Token::getNameFromTokenKind(tokenKind));
+            _state.AddError(std::string("Determined end of input: Expected ") + Token::getNameFromTokenKind(tokenKind));
 			return;
 		}
 
-		_errors.push_back(std::string("Determined end of input, expected ") + std::string(lexeme));
+        _state.AddError(std::string("Determined end of input, expected ") + std::string(lexeme));
 	}
 }

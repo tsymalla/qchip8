@@ -1,5 +1,6 @@
 #include <lexer.hpp>
 #include <sstream>
+#include <algorithm>
 
 namespace compiler
 {
@@ -11,8 +12,8 @@ namespace compiler
 
     Token::Token(Token::TokenKind kind, std::string_view content, size_t start, size_t end, const ValueType& value) :
         _kind{ kind },
-        _range{ start, end },
-        _value{ value }
+        _value{ value },
+        _range{ start, end }
     {
         _lexeme = content.substr(start, end - start);
     }

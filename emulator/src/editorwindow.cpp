@@ -14,15 +14,15 @@ void EditorWindow::parseInput(std::string input)
 
     ui->lstLogOutput->clear();
 
-    const auto& parseResult = parser.Parse();
-    if (parseResult.first != nullptr)
+    const auto parseResult = parser.Parse();
+    if (!parseResult->HasError())
     {
         ui->lstLogOutput->addItem(QString("Success!"));
     }
     else
     {
         ui->lstLogOutput->addItem(QString("Failure:"));
-        for (const std::string& line: parseResult.second)
+        for (const std::string& line: parseResult->GetErrorMessages())
         {
             ui->lstLogOutput->addItem(QString::fromStdString(line));
         }
