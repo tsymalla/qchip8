@@ -13,7 +13,8 @@ namespace compiler
 
     ParserState const* Parser::Parse()
 	{
-		if (!_parseProgram())
+        auto root = _parseProgram();
+		if (!root)
 		{
             if (_state.HasError())
 			{
@@ -24,6 +25,8 @@ namespace compiler
 				}
 			}
 		}
+
+        _state.SetAstRoot(std::move(root));
 
         return &_state;
 	}
@@ -98,52 +101,74 @@ namespace compiler
         ++_tokenIndex;
     }
 
-	bool Parser::_parseID()
+    Token Parser::_expect(Token::TokenKind tokenKind) {
+        Token nextToken = _peek();
+
+        if (nextToken.getKind() == tokenKind)
+        {
+            return nextToken;
+        }
+
+        _handleError(nextToken, tokenKind);
+        return NullToken;
+    }
+
+    NodePtr Parser::_parseID()
 	{
 		Token nextToken = _peek();
 		if (nextToken.getKind() == Token::TokenKind::ID)
 		{
 			_advance();
-			_state.SetAstRoot(std::make_unique<TopLevelNode>(nextToken.getLexeme()));
-			return true;
+			return std::make_unique<StringLiteralNode>(nextToken.getLexeme());
 		}
 
-		return false;
+		return nullptr;
 	}
 
-	bool Parser::_parseProgram()
+    NodePtr Parser::_parseProgram()
 	{
         if (_match(Token::TokenKind::KEYWORD, "program"))
         {
-			return _parseID() && _parseBlock();
+            auto id = _parseID();
+            auto root = std::make_unique<ProgramNode>(std::move(id));
+            auto block = _parseBlock();
+            root->AddBlock(std::move(block));
+
+
+            return root;
         }
 
-        return false;
+        return nullptr;
 	}
 
-	bool Parser::_parseBlock()
+    std::unique_ptr<BlockNode> Parser::_parseBlock()
 	{
-		return  _match(Token::TokenKind::OPEN_CURLY_BRACKET) &&
-				_parseStatements() &&
-				_match(Token::TokenKind::CLOSE_CURLY_BRACKET);
+        if (_match(Token::TokenKind::OPEN_CURLY_BRACKET))
+        {
+            auto statements = _parseStatements();
+            if (_match(Token::TokenKind::CLOSE_CURLY_BRACKET))
+            {
+                return std::make_unique<BlockNode>(statements);
+            }
+        }
+
+        return nullptr;
 	}
 
-	bool Parser::_parseStatements()
+    std::vector<StatementNodePtr> Parser::_parseStatements()
 	{
-		if (_parseSingleStatement())
-		{
-			if (_parseStatements())
-			{
-				return true;
-			}
+        std::vector<StatementNodePtr> statements;
+        auto statement = _parseSingleStatement();
+        while (statement)
+        {
+            //statements.emplace_back(statement);
+            statement = _parseSingleStatement();
+        }
 
-			return false;
-		}
-
-		return _parseEmptyBlock();
+        return statements;
 	}
 
-	bool Parser::_parseSingleStatement()
+    NodePtr Parser::_parseSingleStatement()
 	{
 		const auto& token = _getCurrentToken();
 		if (token.getKind() == Token::TokenKind::ID)
@@ -167,47 +192,53 @@ namespace compiler
 			}
 		}
 
-		return false;
+		return nullptr;
 	}
 
-	bool Parser::_parseAssignment()
+    NodePtr Parser::_parseAssignment()
 	{
 		// TODO use value here.
 		if (_parseID())
 		{
-			return
+		    return nullptr;
+			/*return
 				_match(Token::TokenKind::EQUAL) &&
 				_match(Token::TokenKind::NUMBER) &&
-				_match(Token::TokenKind::SEMICOLON);
+				_match(Token::TokenKind::SEMICOLON);*/
 		}
 
-		return false;
+		return nullptr;
 	}
 
-	bool Parser::_parseConditional()
+    std::unique_ptr<BinaryNode> Parser::_parseConditional()
 	{
-		return false;
+		return nullptr;
 	}
 
-	bool Parser::_parseLoop()
+    NodePtr Parser::_parseLoop()
 	{
-		return  _match(Token::TokenKind::KEYWORD, "while") &&
-				_match(Token::TokenKind::OPEN_PARENTHESIS) &&
-				_match(Token::TokenKind::ID) &&
-				_match(Token::TokenKind::COMPARE) &&
-				_match(Token::TokenKind::NUMBER) &&
-				_match(Token::TokenKind::CLOSE_PARENTHESIS) &&
-				_parseBlock();
+		if (_match(Token::TokenKind::KEYWORD, "while") &&
+            _match(Token::TokenKind::OPEN_PARENTHESIS))
+        {
+		    auto condition = _parseConditional();
+		    if (_match(Token::TokenKind::CLOSE_PARENTHESIS))
+            {
+		        auto block = _parseBlock();
+                return std::make_unique<ComparisonNode>(std::move(condition), std::move(block));
+            }
+        }
+
+		return nullptr;
 	}
 
-	bool Parser::_parseFunctionCall()
+    NodePtr Parser::_parseFunctionCall()
 	{
-		return false;
+		return nullptr;
 	}
 
-	bool Parser::_parseEmptyBlock() const
+    NodePtr Parser::_parseEmptyBlock() const
 	{
-		return true;
+		return std::make_unique<NullNode>();
 	}
 
 	void Parser::_handleError(Token token, Token::TokenKind tokenKind, std::string_view lexeme)

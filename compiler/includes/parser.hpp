@@ -27,12 +27,12 @@ namespace compiler
             return _errors;
         }
 
-        ExprNode* GetAstRoot()
+        Node* GetAstRoot()
         {
             return _astRoot.get();
         }
 
-        void SetAstRoot(ExprNodePtr root)
+        void SetAstRoot(NodePtr root)
         {
             _astRoot = std::move(root);
         }
@@ -40,7 +40,7 @@ namespace compiler
     private:
         bool _hasError = false;
         std::vector<std::string> _errors;
-        ExprNodePtr _astRoot;
+        NodePtr _astRoot;
     };
 
 	class Parser final
@@ -56,17 +56,18 @@ namespace compiler
         bool _match(Token::TokenKind tokenKind);
 		bool _match(Token::TokenKind tokenKind, std::string_view lexeme);
         Token _peek() const;
+        Token _expect(Token::TokenKind tokenKind);
         void _advance();
-        bool _parseID();
-        bool _parseProgram();
-        bool _parseBlock();
-        bool _parseStatements();
-        bool _parseSingleStatement();
-        bool _parseAssignment();
-        bool _parseConditional();
-        bool _parseLoop();
-        bool _parseFunctionCall();
-        bool _parseEmptyBlock() const;
+        NodePtr _parseID();
+        NodePtr _parseProgram();
+        std::unique_ptr<BlockNode> _parseBlock();
+        std::vector<StatementNodePtr> _parseStatements();
+        NodePtr _parseSingleStatement();
+        NodePtr _parseAssignment();
+        std::unique_ptr<BinaryNode> _parseConditional();
+        NodePtr _parseLoop();
+        NodePtr _parseFunctionCall();
+        NodePtr _parseEmptyBlock() const;
 
         void _handleError(Token token, Token::TokenKind tokenKind, std::string_view lexeme = "");
         void _handleEndOfInput(Token::TokenKind tokenKind, std::string_view lexeme = "");
