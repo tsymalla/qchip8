@@ -14,6 +14,8 @@ ADD_LIBRARY(${PROJECT_NAME} STATIC
     includes/parser.hpp
     src/parser.cpp
     includes/ast.hpp
-    src/ast.cpp)
+    includes/astvisitor.hpp
+    src/astvisitor.cpp
+    src/ast.cpp "includes/astvisitor.hpp" "src/astvisitor.cpp")
 
 ADD_SUBDIRECTORY(tests)

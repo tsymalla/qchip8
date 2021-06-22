@@ -3,6 +3,8 @@
 
 #include <memory>
 #include <string>
+#include <vector>
+#include <astvisitor.hpp>
 
 namespace compiler
 {
@@ -10,6 +12,7 @@ namespace compiler
 	{
     public:
         virtual void GenerateCode() = 0;
+        virtual void Accept(NodeVisitor* visitor) = 0;
 	};
 
     using NodePtr = std::unique_ptr<Node>;
@@ -18,12 +21,14 @@ namespace compiler
     {
     public:
         void GenerateCode() override {}
+        void Accept(NodeVisitor* visitor) {}
     };
 
     class StatementNode: public Node
     {
     public:
         void GenerateCode() override {}
+        void Accept(NodeVisitor* visitor) override {}
     };
 
     class ExpressionNode: public Node
@@ -31,6 +36,7 @@ namespace compiler
     public:
         ExpressionNode() = default;
         void GenerateCode() override {}
+        void Accept(NodeVisitor* visitor) override {}
     };
 
     using StatementNodePtr = std::unique_ptr<StatementNode>;
@@ -41,6 +47,7 @@ namespace compiler
     public:
         LiteralNode() = default;
         void GenerateCode() override {}
+        void Accept(NodeVisitor* visitor) override {}
     };
 
     class NumericLiteralNode: public LiteralNode
@@ -49,8 +56,14 @@ namespace compiler
         explicit NumericLiteralNode(int value): _value{ value }
         {
         }
+        
+        int GetValue() const
+        {
+            return _value;
+        }
 
         void GenerateCode() override {}
+        void Accept(NodeVisitor* visitor) override;
 
     private:
         int _value;
@@ -63,7 +76,13 @@ namespace compiler
         {
         }
 
+        std::string GetValue() const
+        {
+            return _value;
+        }
+
         void GenerateCode() override {}
+        void Accept(NodeVisitor* visitor);
 
     private:
         std::string _value;
@@ -72,13 +91,19 @@ namespace compiler
     class BlockNode: public Node
     {
     public:
-        explicit BlockNode(const std::vector<StatementNodePtr>& statements)
+        explicit BlockNode(std::vector<NodePtr>&& statements): _statements{ std::move(statements) }
         {
         }
 
+        const std::vector<NodePtr>& GetStatements() const
+        {
+            return _statements;
+        }
+
         void GenerateCode() override {}
+        void Accept(NodeVisitor* visitor) override;
     private:
-        std::vector<StatementNodePtr> _statements;
+        std::vector<NodePtr> _statements;
     };
 
     class ProgramNode: public Node
@@ -93,9 +118,21 @@ namespace compiler
             _blocks.push_back(std::move(block));
         }
 
+        Node* GetName() const
+        {
+            return _name.get();
+        }
+
+        const std::vector<std::unique_ptr<BlockNode>>& GetBlocks() const
+        {
+            return _blocks;
+        }
+
         void GenerateCode() override
         {
         }
+
+        void Accept(NodeVisitor* visitor) override;
 
     private:
         NodePtr _name;
@@ -118,7 +155,18 @@ namespace compiler
         {
         }
 
+        Node* GetNode() const
+        {
+            return _node.get();
+        }
+
+        UnaryOperator GetOperator() const
+        {
+            return _operator;
+        }
+
         void GenerateCode() override;
+        void Accept(NodeVisitor* visitor) override;
 
     private:
         ExpressionNodePtr _node;
@@ -141,7 +189,7 @@ namespace compiler
     class BinaryNode: public ExpressionNode
     {
     public:
-        explicit BinaryNode(ExpressionNodePtr left, ExpressionNodePtr right, BinaryOperator op):
+        explicit BinaryNode(NodePtr left, ExpressionNodePtr right, BinaryOperator op):
             _left{ std::move(left)},
             _right{ std::move(right) },
             _operator{ op }
@@ -149,10 +197,27 @@ namespace compiler
         }
 
         ~BinaryNode() = default;
+
+        Node* GetLHS() const
+        {
+            return _left.get();
+        }
+
+        Node* GetRHS() const
+        {
+            return _right.get();
+        }
+
+        BinaryOperator GetOperator() const
+        {
+            return _operator;
+        }
+
         void GenerateCode() override {}
+        void Accept(NodeVisitor* visitor) override;
 
     private:
-        ExpressionNodePtr _left;
+        NodePtr _left;
         ExpressionNodePtr _right;
         BinaryOperator _operator;
     };
@@ -164,9 +229,21 @@ namespace compiler
         {
         }
 
+        BinaryNode* GetCondition() const
+        {
+            return _condition.get();
+        }
+
+        BlockNode* GetBlock() const
+        {
+            return _block.get();
+        }
+
         void GenerateCode() override
         {
         }
+
+        void Accept(NodeVisitor* visitor) override;
     private:
         std::unique_ptr<BinaryNode> _condition;
         std::unique_ptr<BlockNode> _block;

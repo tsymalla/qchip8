@@ -3,6 +3,7 @@
 
 #include <lexer.hpp>
 #include <ast.hpp>
+#include <astvisitor.hpp>
 #include <vector>
 #include <utility>
 
@@ -37,6 +38,12 @@ namespace compiler
             _astRoot = std::move(root);
         }
 
+        void Dump() const
+        {
+            PrintNodeVisitor visitor;
+            _astRoot->Accept(&visitor);
+        }
+
     private:
         bool _hasError = false;
         std::vector<std::string> _errors;
@@ -61,7 +68,7 @@ namespace compiler
         NodePtr _parseID();
         NodePtr _parseProgram();
         std::unique_ptr<BlockNode> _parseBlock();
-        std::vector<StatementNodePtr> _parseStatements();
+        std::vector<NodePtr> _parseStatements();
         NodePtr _parseSingleStatement();
         NodePtr _parseAssignment();
         std::unique_ptr<BinaryNode> _parseConditional();

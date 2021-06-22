@@ -27,6 +27,7 @@ namespace compiler
 		}
 
         _state.SetAstRoot(std::move(root));
+		_state.Dump();
 
         return &_state;
 	}
@@ -134,7 +135,6 @@ namespace compiler
             auto block = _parseBlock();
             root->AddBlock(std::move(block));
 
-
             return root;
         }
 
@@ -148,20 +148,20 @@ namespace compiler
             auto statements = _parseStatements();
             if (_match(Token::TokenKind::CLOSE_CURLY_BRACKET))
             {
-                return std::make_unique<BlockNode>(statements);
+                return std::make_unique<BlockNode>(std::move(statements));
             }
         }
 
         return nullptr;
 	}
 
-    std::vector<StatementNodePtr> Parser::_parseStatements()
+    std::vector<NodePtr> Parser::_parseStatements()
 	{
-        std::vector<StatementNodePtr> statements;
-        auto statement = _parseSingleStatement();
-        while (statement)
+        std::vector<NodePtr> statements;
+
+        while (auto statement = _parseSingleStatement())
         {
-            //statements.emplace_back(statement);
+            statements.push_back(std::move(statement));
             statement = _parseSingleStatement();
         }
 
@@ -171,25 +171,30 @@ namespace compiler
     NodePtr Parser::_parseSingleStatement()
 	{
 		const auto& token = _getCurrentToken();
+		NodePtr statement = nullptr;
 		if (token.getKind() == Token::TokenKind::ID)
 		{
-			return _parseAssignment();
+			statement = _parseAssignment();
 		}
 		else if (token.getKind() == Token::TokenKind::KEYWORD)
 		{
 			if (token.getLexeme() == "if")
 			{
-				return _parseConditional();
+				statement = _parseConditional();
 			}
 			else if (token.getLexeme() == "while")
 			{
-				return _parseLoop();
+				statement = _parseLoop();
 			}
 			else if (token.getLexeme() == "call")
 			{
-				// TODO
-				return _parseFunctionCall();
+				statement = _parseFunctionCall();
 			}
+		}
+
+		if (_match(Token::TokenKind::SEMICOLON))
+		{
+			return statement;
 		}
 
 		return nullptr;
@@ -197,14 +202,16 @@ namespace compiler
 
     NodePtr Parser::_parseAssignment()
 	{
-		// TODO use value here.
-		if (_parseID())
+		auto id = _parseID();
+		if (id && _match(Token::TokenKind::EQUAL))
 		{
-		    return nullptr;
-			/*return
-				_match(Token::TokenKind::EQUAL) &&
-				_match(Token::TokenKind::NUMBER) &&
-				_match(Token::TokenKind::SEMICOLON);*/
+			auto value = _expect(Token::TokenKind::NUMBER);
+			if (value.getKind() == Token::TokenKind::NUMBER)
+			{
+				_advance();
+				auto rhs = std::make_unique<NumericLiteralNode>(std::get<int>(value.getValue()));
+				return std::make_unique<BinaryNode>(std::move(id), std::move(rhs), BinaryOperator::ASSIGN);
+			}
 		}
 
 		return nullptr;
