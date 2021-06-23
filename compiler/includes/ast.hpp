@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 #include <astvisitor.hpp>
+#include <lexer.hpp>
 
 namespace compiler
 {
@@ -21,7 +22,7 @@ namespace compiler
     {
     public:
         void GenerateCode() override {}
-        void Accept(NodeVisitor* visitor) {}
+        void Accept(NodeVisitor* visitor) override {}
     };
 
     class StatementNode: public Node
@@ -82,7 +83,7 @@ namespace compiler
         }
 
         void GenerateCode() override {}
-        void Accept(NodeVisitor* visitor);
+        void Accept(NodeVisitor* visitor) override;
 
     private:
         std::string _value;
@@ -183,13 +184,18 @@ namespace compiler
         AND,
         OR,
         XOR,
-        ASSIGN
+        ASSIGN,
+        LESS,
+        LESS_OR_EQUAL,
+        GREATER,
+        GREATER_OR_EQUAL,
+        EQUAL
     };
 
     class BinaryNode: public ExpressionNode
     {
     public:
-        explicit BinaryNode(NodePtr left, ExpressionNodePtr right, BinaryOperator op):
+        explicit BinaryNode(NodePtr left, NodePtr right, BinaryOperator op):
             _left{ std::move(left)},
             _right{ std::move(right) },
             _operator{ op }
@@ -197,6 +203,23 @@ namespace compiler
         }
 
         ~BinaryNode() = default;
+
+        static BinaryOperator GetBinaryOperator(Token token)
+        {
+            switch (token.getKind())
+            {
+                case Token::TokenKind::GREATER:
+                return BinaryOperator::GREATER;
+                case Token::TokenKind::GREATER_OR_EQUAL:
+                return BinaryOperator::GREATER_OR_EQUAL;
+                case Token::TokenKind::LESS:
+                return BinaryOperator::LESS;
+                case Token::TokenKind::LESS_OR_EQUAL:
+                return BinaryOperator::LESS_OR_EQUAL;
+                case Token::TokenKind::EQUAL:
+                return BinaryOperator::EQUAL;
+            }
+        }
 
         Node* GetLHS() const
         {
@@ -218,7 +241,7 @@ namespace compiler
 
     private:
         NodePtr _left;
-        ExpressionNodePtr _right;
+        NodePtr _right;
         BinaryOperator _operator;
     };
 

@@ -57,6 +57,7 @@ namespace compiler
         std::string getLexeme() const;
         ValueType getValue() const;
         NumberRange getRange() const;
+        bool isComparisonOperator() const;
 
         friend std::ostream& operator<<(std::ostream& rhs, const Token& token);
     private:

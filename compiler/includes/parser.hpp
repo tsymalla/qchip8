@@ -65,7 +65,8 @@ namespace compiler
         Token _peek() const;
         Token _expect(Token::TokenKind tokenKind);
         void _advance();
-        NodePtr _parseID();
+        NodePtr _getID();
+        NodePtr _getNumericLiteral();
         NodePtr _parseProgram();
         std::unique_ptr<BlockNode> _parseBlock();
         std::vector<NodePtr> _parseStatements();

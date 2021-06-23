@@ -46,6 +46,11 @@ namespace compiler
         return TOKEN_NAMES[static_cast<size_t>(kind)];
     }
 
+    bool Token::isComparisonOperator() const
+    {
+        return _kind >= Token::TokenKind::LESS && _kind <= Token::TokenKind::COMPARE;
+    }
+
     Lexer::Lexer(std::string input):
         _input{std::move(input)},
         _currentPos{0}

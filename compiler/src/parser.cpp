@@ -114,7 +114,7 @@ namespace compiler
         return NullToken;
     }
 
-    NodePtr Parser::_parseID()
+    NodePtr Parser::_getID()
 	{
 		Token nextToken = _peek();
 		if (nextToken.getKind() == Token::TokenKind::ID)
@@ -126,11 +126,23 @@ namespace compiler
 		return nullptr;
 	}
 
+	NodePtr Parser::_getNumericLiteral()
+	{
+		auto value = _expect(Token::TokenKind::NUMBER);
+		if (value.getKind() == Token::TokenKind::NUMBER)
+		{
+			_advance();
+			auto rhs = std::make_unique<NumericLiteralNode>(std::get<int>(value.getValue()));
+		}
+
+		return nullptr;
+	}
+
     NodePtr Parser::_parseProgram()
 	{
         if (_match(Token::TokenKind::KEYWORD, "program"))
         {
-            auto id = _parseID();
+            auto id = _getID();
             auto root = std::make_unique<ProgramNode>(std::move(id));
             auto block = _parseBlock();
             root->AddBlock(std::move(block));
@@ -202,15 +214,13 @@ namespace compiler
 
     NodePtr Parser::_parseAssignment()
 	{
-		auto id = _parseID();
+		auto id = _getID();
 		if (id && _match(Token::TokenKind::EQUAL))
 		{
-			auto value = _expect(Token::TokenKind::NUMBER);
-			if (value.getKind() == Token::TokenKind::NUMBER)
+			auto value = _getNumericLiteral();
+			if (value)
 			{
-				_advance();
-				auto rhs = std::make_unique<NumericLiteralNode>(std::get<int>(value.getValue()));
-				return std::make_unique<BinaryNode>(std::move(id), std::move(rhs), BinaryOperator::ASSIGN);
+				return std::make_unique<BinaryNode>(std::move(id), std::move(value), BinaryOperator::ASSIGN);
 			}
 		}
 
@@ -219,6 +229,26 @@ namespace compiler
 
     std::unique_ptr<BinaryNode> Parser::_parseConditional()
 	{
+		if (_match(Token::TokenKind::KEYWORD, "if") &&
+			_match(Token::TokenKind::OPEN_PARENTHESIS))
+		{
+			auto id = _getID();
+			if (id)
+			{
+				auto op = _peek();
+				if (op.isComparisonOperator())
+				{
+					_advance();
+					auto value = _getNumericLiteral();
+					if (value)
+					{
+						auto block = _parseBlock();
+						return std::make_unique<BinaryNode>(std::move(id), std::move(value), BinaryNode::GetBinaryOperator(op));
+					}
+				}
+			}
+		}
+
 		return nullptr;
 	}
 
