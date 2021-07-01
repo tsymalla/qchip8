@@ -15,10 +15,10 @@ static auto lexAndReturnNumberOfTokens(std::string input)
     std::cout << std::endl << "Tokens:" << std::endl;
     for (const auto& token: result)
     {
-        std::cout << "\t *** " << token << std::endl;
+        std::cout << token << "\t";
     }
 
-    std::cout << std::endl << "-------" << std::endl;
+    std::cout << std::endl;
     
     return result;
 }

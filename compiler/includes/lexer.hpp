@@ -12,6 +12,8 @@ namespace compiler
     class Token final
     {
     public:
+        Token() = default;
+    	
         using ValueType = std::variant<std::monostate, int, double, const char*>;
         struct NumberRange
         {

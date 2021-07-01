@@ -13,22 +13,11 @@ namespace compiler
     class ParserState final
     {
     public:
-        void AddError(std::string message)
-        {
-            _hasError = true;
-            _errors.push_back(std::move(message));
-        }
-
-        bool HasError() const
-        {
-            return _hasError;
-        }
-
-        std::vector<std::string> GetErrorMessages() const
-        {
-            return _errors;
-        }
-
+    	ParserErrorState* GetErrorState()
+    	{
+            return &_errorState;
+    	}
+    	
         Node* GetAstRoot() const
         {
             return _astRoot.get();
@@ -46,8 +35,7 @@ namespace compiler
         }
 
     private:
-        bool _hasError = false;
-        std::vector<std::string> _errors;
+        ParserErrorState _errorState;
         NodePtr _astRoot;
     };
 
@@ -78,10 +66,6 @@ namespace compiler
         std::unique_ptr<BinaryNode> _parseCondition();
         NodePtr _parseLoop();
         NodePtr _parseFunctionCall();
-
-        void _handleError(const Token& token, Token::TokenKind tokenKind, std::string_view lexeme = "");
-        void _handleEndOfInput(Token::TokenKind tokenKind, std::string_view lexeme = "");
-
     public:
 		Parser(const std::vector<Token>& tokens);
 		
@@ -90,7 +74,7 @@ namespace compiler
 		Parser(Parser&&) = delete;
 		Parser& operator=(Parser&&) = delete;
 
-        ParserState const* Parse();
+        ParserState* Parse();
 	};
 }
 

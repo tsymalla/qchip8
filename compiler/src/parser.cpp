@@ -11,19 +11,12 @@ namespace compiler
 		}
 	}
 
-	ParserState const* Parser::Parse()
+	ParserState* Parser::Parse()
 	{
 		auto root = _parseProgram();
-		if (!root)
+		if (_state.GetErrorState()->HasErrors())
 		{
-			if (_state.HasError())
-			{
-				std::cout << "Compilation error: " << _state.GetErrorMessages().size() << " errors:" << std::endl;
-				for (const auto& error : _state.GetErrorMessages())
-				{
-					std::cout << error << std::endl;
-				}
-			}
+			_state.GetErrorState()->DumpErrors(std::cout);
 		}
 
 		_state.SetAstRoot(std::move(root));
@@ -51,13 +44,13 @@ namespace compiler
 	{
 		if (!_hasToken())
 		{
-			_handleEndOfInput(tokenKind);
+			_state.GetErrorState()->HandleEndOfInput(tokenKind);
 			return false;
 		}
 
 		if (const Token& token = _getCurrentToken(); token.getKind() != tokenKind)
 		{
-			_handleError(token, tokenKind, "");
+			_state.GetErrorState()->HandleUnexpectedToken(token, tokenKind, "");
 			return false;
 		}
 
@@ -70,13 +63,13 @@ namespace compiler
 	{
 		if (!_hasToken())
 		{
-			_handleEndOfInput(tokenKind, lexeme);
+			_state.GetErrorState()->HandleEndOfInput(tokenKind, lexeme);
 			return false;
 		}
 
 		if (const Token& token = _getCurrentToken(); token.getKind() != tokenKind && token.getLexeme() != lexeme)
 		{
-			_handleError(token, tokenKind, lexeme);
+			_state.GetErrorState()->HandleUnexpectedToken(token, tokenKind, lexeme);
 			return false;
 		}
 
@@ -108,7 +101,7 @@ namespace compiler
 			return nextToken;
 		}
 
-		_handleError(nextToken, tokenKind);
+		_state.GetErrorState()->HandleUnexpectedToken(nextToken, tokenKind);
 		return NullToken;
 	}
 
@@ -157,7 +150,7 @@ namespace compiler
 	//
 	NodePtr Parser::_parseExpression()
 	{
-
+		return nullptr;
 	}
 
 	//
@@ -305,27 +298,5 @@ namespace compiler
 	NodePtr Parser::_parseFunctionCall()
 	{
 		return nullptr;
-	}
-
-	void Parser::_handleError(const Token& token, Token::TokenKind tokenKind, std::string_view lexeme)
-	{
-		if (lexeme == "")
-		{
-			_state.AddError(std::string("Parse error: Expected ") + Token::getNameFromTokenKind(tokenKind));
-			return;
-		}
-
-		_state.AddError(std::string("Parse error: Got ") + token.getLexeme() + ", expected: " + std::string(lexeme));
-	}
-
-	void Parser::_handleEndOfInput(Token::TokenKind tokenKind, std::string_view lexeme)
-	{
-		if (lexeme == "")
-		{
-			_state.AddError(std::string("Determined end of input: Expected ") + Token::getNameFromTokenKind(tokenKind));
-			return;
-		}
-
-		_state.AddError(std::string("Determined end of input, expected ") + std::string(lexeme));
 	}
 }

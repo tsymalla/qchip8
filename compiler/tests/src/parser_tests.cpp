@@ -14,9 +14,9 @@ static bool parseInput(std::string input)
 	auto result = lexer.Lex();
 
 	compiler::Parser parser(result);
-	const auto parserState = parser.Parse();
+	auto parserState = parser.Parse();
 
-	return !parserState->HasError();
+	return !parserState->GetErrorState()->HasErrors();
 }
 
 TEST_CASE("Parser is able to parse a simple program without statements")
