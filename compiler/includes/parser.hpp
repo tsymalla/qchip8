@@ -72,12 +72,13 @@ namespace compiler
         std::vector<NodePtr> _parseStatements();
         NodePtr _parseSingleStatement();
         NodePtr _parseAssignment();
-        std::unique_ptr<BinaryNode> _parseConditional();
+        std::unique_ptr<BinaryNode> _parseIf();
+        std::unique_ptr<BinaryNode> _parseCondition();
         NodePtr _parseLoop();
         NodePtr _parseFunctionCall();
         NodePtr _parseEmptyBlock() const;
 
-        void _handleError(Token token, Token::TokenKind tokenKind, std::string_view lexeme = "");
+        void _handleError(const Token& token, Token::TokenKind tokenKind, std::string_view lexeme = "");
         void _handleEndOfInput(Token::TokenKind tokenKind, std::string_view lexeme = "");
 
     public:

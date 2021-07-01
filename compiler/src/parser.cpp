@@ -75,8 +75,7 @@ namespace compiler
 			return false;
 		}
 
-		const Token& token = _getCurrentToken();
-		if (token.getKind() != tokenKind && token.getLexeme() != lexeme)
+		if (const Token & token = _getCurrentToken(); token.getKind() != tokenKind && token.getLexeme() != lexeme)
 		{
 			_handleError(token, tokenKind, lexeme);
 			return false;
@@ -116,8 +115,7 @@ namespace compiler
 
     NodePtr Parser::_getID()
 	{
-		Token nextToken = _peek();
-		if (nextToken.getKind() == Token::TokenKind::ID)
+		if (const Token nextToken = _peek(); nextToken.getKind() == Token::TokenKind::ID)
 		{
 			_advance();
 			return std::make_unique<StringLiteralNode>(nextToken.getLexeme());
@@ -128,16 +126,18 @@ namespace compiler
 
 	NodePtr Parser::_getNumericLiteral()
 	{
-		auto value = _expect(Token::TokenKind::NUMBER);
-		if (value.getKind() == Token::TokenKind::NUMBER)
+		if (const auto value = _expect(Token::TokenKind::NUMBER); value.getKind() == Token::TokenKind::NUMBER)
 		{
 			_advance();
-			auto rhs = std::make_unique<NumericLiteralNode>(std::get<int>(value.getValue()));
+			return std::make_unique<NumericLiteralNode>(std::get<int>(value.getValue()));
 		}
 
 		return nullptr;
 	}
 
+	//
+	// S -> "program" ID BLOCK
+	//
     NodePtr Parser::_parseProgram()
 	{
         if (_match(Token::TokenKind::KEYWORD, "program"))
@@ -147,12 +147,15 @@ namespace compiler
             auto block = _parseBlock();
             root->AddBlock(std::move(block));
 
-            return root;
+            return std::move(root);
         }
 
         return nullptr;
 	}
 
+	//
+	// BLOCK -> "{" STMTS "}"
+	//
     std::unique_ptr<BlockNode> Parser::_parseBlock()
 	{
         if (_match(Token::TokenKind::OPEN_CURLY_BRACKET))
@@ -167,6 +170,9 @@ namespace compiler
         return nullptr;
 	}
 
+	//
+	// STMTS -> STMT STMTS | e
+	//
     std::vector<NodePtr> Parser::_parseStatements()
 	{
         std::vector<NodePtr> statements;
@@ -180,71 +186,50 @@ namespace compiler
         return statements;
 	}
 
+	//
+	// STMT -> ASSIGN | COND | LOOP | CALL
+	//
     NodePtr Parser::_parseSingleStatement()
 	{
 		const auto& token = _getCurrentToken();
-		NodePtr statement = nullptr;
+
 		if (token.getKind() == Token::TokenKind::ID)
 		{
-			statement = _parseAssignment();
+			return _parseAssignment();
 		}
-		else if (token.getKind() == Token::TokenKind::KEYWORD)
+
+    	if (token.getKind() == Token::TokenKind::KEYWORD)
 		{
 			if (token.getLexeme() == "if")
 			{
-				statement = _parseConditional();
+				return _parseIf();
 			}
 			else if (token.getLexeme() == "while")
 			{
-				statement = _parseLoop();
+				return _parseLoop();
 			}
 			else if (token.getLexeme() == "call")
 			{
-				statement = _parseFunctionCall();
+				return _parseFunctionCall();
 			}
-		}
-
-		if (_match(Token::TokenKind::SEMICOLON))
-		{
-			return statement;
 		}
 
 		return nullptr;
 	}
 
+	//
+	// ASSIGN -> ID "=" VAL ";"
+	//
     NodePtr Parser::_parseAssignment()
 	{
-		auto id = _getID();
-		if (id && _match(Token::TokenKind::EQUAL))
+		if (auto id = _getID(); id && _match(Token::TokenKind::EQUAL))
 		{
-			auto value = _getNumericLiteral();
-			if (value)
+			// TODO: differentiate between lvalues and rvalues here.
+			if (auto value = _getNumericLiteral(); value)
 			{
-				return std::make_unique<BinaryNode>(std::move(id), std::move(value), BinaryOperator::ASSIGN);
-			}
-		}
-
-		return nullptr;
-	}
-
-    std::unique_ptr<BinaryNode> Parser::_parseConditional()
-	{
-		if (_match(Token::TokenKind::KEYWORD, "if") &&
-			_match(Token::TokenKind::OPEN_PARENTHESIS))
-		{
-			auto id = _getID();
-			if (id)
-			{
-				auto op = _peek();
-				if (op.isComparisonOperator())
+				if (_match(Token::TokenKind::SEMICOLON))
 				{
-					_advance();
-					auto value = _getNumericLiteral();
-					if (value)
-					{
-						auto block = _parseBlock();
-						return std::make_unique<BinaryNode>(std::move(id), std::move(value), BinaryNode::GetBinaryOperator(op));
-					}
+					return std::make_unique<BinaryNode>(std::move(id), std::move(value), BinaryOperator::ASSIGN);
 				}
 			}
 		}
@@ -252,12 +237,46 @@ namespace compiler
 		return nullptr;
 	}
 
+	//
+	// IF -> "if" COND BLOCK
+	//
+    std::unique_ptr<BinaryNode> Parser::_parseIf()
+	{
+		if (_match(Token::TokenKind::KEYWORD, "if") &&
+			_match(Token::TokenKind::OPEN_PARENTHESIS))
+		{
+			return _parseCondition();
+		}
+
+		return nullptr;
+	}
+
+	std::unique_ptr<BinaryNode> Parser::_parseCondition()
+    {
+		if (auto id = _getID(); id)
+		{
+			if (const auto op = _peek(); op.isComparisonOperator())
+			{
+				_advance();
+				if (auto value = _getNumericLiteral(); value)
+				{
+					return std::make_unique<BinaryNode>(std::move(id), std::move(value), BinaryNode::GetBinaryOperator(op));
+				}
+			}
+		}
+
+		return nullptr;
+    }
+	
+	//
+	// LOOP -> "while" "(" COND ")" BLOCK
+	//
     NodePtr Parser::_parseLoop()
 	{
 		if (_match(Token::TokenKind::KEYWORD, "while") &&
             _match(Token::TokenKind::OPEN_PARENTHESIS))
         {
-		    auto condition = _parseConditional();
+		    auto condition = _parseCondition();
 		    if (_match(Token::TokenKind::CLOSE_PARENTHESIS))
             {
 		        auto block = _parseBlock();
@@ -278,7 +297,7 @@ namespace compiler
 		return std::make_unique<NullNode>();
 	}
 
-	void Parser::_handleError(Token token, Token::TokenKind tokenKind, std::string_view lexeme)
+	void Parser::_handleError(const Token& token, Token::TokenKind tokenKind, std::string_view lexeme)
 	{
 		if (lexeme == "")
 		{
