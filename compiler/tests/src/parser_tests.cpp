@@ -14,9 +14,9 @@ static bool parseInput(std::string input)
 	auto result = lexer.Lex();
 
 	compiler::Parser parser(result);
-    const auto parserState = parser.Parse();
+	const auto parserState = parser.Parse();
 
-    return !parserState->HasError();
+	return !parserState->HasError();
 }
 
 TEST_CASE("Parser is able to parse a simple program without statements")
@@ -57,7 +57,7 @@ TEST_CASE("Parser is able to parse a multi-line program")
 
 TEST_CASE("Parser is able to determine a invalid loop")
 {
-    CHECK(!parseInput("program test\n \
+	CHECK(!parseInput("program test\n \
     {\n \
         while (x > y) {} \n \
     }"));

@@ -12,10 +12,12 @@ ADD_LIBRARY(${PROJECT_NAME} STATIC
     src/lexer.cpp
     includes/lexer.hpp
     includes/parser.hpp
+    includes/parser_error_state.hpp
     src/parser.cpp
+    src/parser_error_state.cpp
     includes/ast.hpp
     includes/astvisitor.hpp
     src/astvisitor.cpp
-    src/ast.cpp "includes/astvisitor.hpp" "src/astvisitor.cpp")
+    src/ast.cpp)
 
 ADD_SUBDIRECTORY(tests)

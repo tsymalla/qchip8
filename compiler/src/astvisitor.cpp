@@ -27,7 +27,18 @@ namespace compiler
         std::cout << "Numeric: " << node->GetValue() << std::endl;
     }
 
-    void PrintNodeVisitor::VisitUnary(UnaryNode* node) {}
-    void PrintNodeVisitor::VisitBinary(BinaryNode* node) {}
-    void PrintNodeVisitor::VisitComparison(ComparisonNode* node) {}
+    void PrintNodeVisitor::VisitUnary(UnaryNode* node)
+    {
+    	
+    }
+	
+    void PrintNodeVisitor::VisitBinary(BinaryNode* node)
+    {
+	    
+    }
+	
+    void PrintNodeVisitor::VisitComparison(ComparisonNode* node)
+    {
+	    
+    }
 }

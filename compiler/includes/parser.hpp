@@ -3,6 +3,7 @@
 
 #include <lexer.hpp>
 #include <ast.hpp>
+#include <parser_error_state.hpp>
 #include <astvisitor.hpp>
 #include <vector>
 #include <utility>
@@ -28,7 +29,7 @@ namespace compiler
             return _errors;
         }
 
-        Node* GetAstRoot()
+        Node* GetAstRoot() const
         {
             return _astRoot.get();
         }
@@ -68,6 +69,7 @@ namespace compiler
         NodePtr _getID();
         NodePtr _getNumericLiteral();
         NodePtr _parseProgram();
+        NodePtr _parseExpression();
         std::unique_ptr<BlockNode> _parseBlock();
         std::vector<NodePtr> _parseStatements();
         NodePtr _parseSingleStatement();
@@ -76,7 +78,6 @@ namespace compiler
         std::unique_ptr<BinaryNode> _parseCondition();
         NodePtr _parseLoop();
         NodePtr _parseFunctionCall();
-        NodePtr _parseEmptyBlock() const;
 
         void _handleError(const Token& token, Token::TokenKind tokenKind, std::string_view lexeme = "");
         void _handleEndOfInput(Token::TokenKind tokenKind, std::string_view lexeme = "");
