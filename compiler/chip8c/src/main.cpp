@@ -21,7 +21,7 @@ int main(int argc, char** argv)
 	}
 
 	std::string inputBuffer{ std::istreambuf_iterator<char>(inputFile), std::istreambuf_iterator<char>() };
-	
+
 	Lexer lexer(std::move(inputBuffer));
 	const auto& tokens = lexer.Lex();
 	Parser parser(tokens);

@@ -270,7 +270,7 @@ namespace compiler
 
     Token Lexer::_getNextToken()
     {
-        while (_isSpace(_currentChar()))
+        while (_isSpace(_currentChar()) && _currentPos < _input.length())
         {
             _forward();
         }
@@ -301,6 +301,12 @@ namespace compiler
         }
 
         _forward();
+        
+        if (_currentPos >= _input.length())
+        {
+            return Token::MakeToken(Token::TokenKind::END_OF_INPUT, _input);
+        }
+        
         return Token::MakeToken(Token::TokenKind::COMMA, _input, _currentPos, _currentPos + 1);
     }
 

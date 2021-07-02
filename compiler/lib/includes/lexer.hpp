@@ -43,7 +43,8 @@ namespace compiler
             SEMICOLON           = 17,
             COMMENT             = 18,
             KEYWORD             = 19,
-            UNDEFINED			= 20
+            UNDEFINED			= 20,
+            END_OF_INPUT        = 21
         };
 
         explicit Token(TokenKind kind, std::string_view content, size_t start, size_t end, const ValueType& value = std::monostate());
@@ -51,6 +52,11 @@ namespace compiler
         static Token MakeToken(TokenKind kind, std::string_view content, size_t start, size_t end, const ValueType& value = std::monostate())
         {
             return Token{kind, content, start, end, value};
+        }
+
+        static Token MakeToken(TokenKind kind, std::string_view content, const ValueType& value = std::monostate())
+        {
+            return Token{kind, content, 0, 0, value};
         }
 
         static const char* getNameFromTokenKind(const TokenKind tokenKind);
@@ -90,7 +96,8 @@ namespace compiler
             "SEMICOLON",
             "COMMENT",
             "KEYWORD",
-            "UNDEFINED"
+            "UNDEFINED",
+            "END_OF_INPUT"
         };
     };
 
