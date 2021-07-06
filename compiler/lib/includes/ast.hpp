@@ -1,276 +1,299 @@
 #ifndef AST_HPP
 #define AST_HPP
 
+#include <astvisitor.hpp>
+#include <lexer.hpp>
 #include <memory>
 #include <string>
 #include <vector>
-#include <astvisitor.hpp>
-#include <lexer.hpp>
 
 namespace compiler
 {
-    class Node
+	class Node
 	{
-    public:
-        virtual void GenerateCode() = 0;
-        virtual void Accept(NodeVisitor* visitor) = 0;
+	  public:
+		virtual void GenerateCode() = 0;
+		virtual void Accept(NodeVisitor* visitor) = 0;
 	};
 
-    using NodePtr = std::unique_ptr<Node>;
+	using NodePtr = std::unique_ptr<Node>;
 
-    class NullNode final: public Node
-    {
-    public:
-        void GenerateCode() override {}
-        void Accept(NodeVisitor* visitor) override {}
-    };
+	class NullNode final : public Node
+	{
+	  public:
+		void GenerateCode() override
+		{
+		}
+		void Accept(NodeVisitor* visitor) override
+		{
+		}
+	};
 
-    class StatementNode: public Node
-    {
-    public:
-        void GenerateCode() override {}
-        void Accept(NodeVisitor* visitor) override {}
-    };
+	class StatementNode : public Node
+	{
+	  public:
+		void GenerateCode() override
+		{
+		}
+		void Accept(NodeVisitor* visitor) override
+		{
+		}
+	};
 
-    class ExpressionNode: public Node
-    {
-    public:
-        ExpressionNode() = default;
-        void GenerateCode() override {}
-        void Accept(NodeVisitor* visitor) override {}
-    };
+	class ExpressionNode : public Node
+	{
+	  public:
+		ExpressionNode() = default;
+		void GenerateCode() override
+		{
+		}
+		void Accept(NodeVisitor* visitor) override
+		{
+		}
+	};
 
-    using StatementNodePtr = std::unique_ptr<StatementNode>;
-    using ExpressionNodePtr = std::unique_ptr<ExpressionNode>;
+	using StatementNodePtr = std::unique_ptr<StatementNode>;
+	using ExpressionNodePtr = std::unique_ptr<ExpressionNode>;
 
-    class LiteralNode: public ExpressionNode
-    {
-    public:
-        LiteralNode() = default;
-        void GenerateCode() override {}
-        void Accept(NodeVisitor* visitor) override {}
-    };
+	class LiteralNode : public ExpressionNode
+	{
+	  public:
+		LiteralNode() = default;
+		void GenerateCode() override
+		{
+		}
+		void Accept(NodeVisitor* visitor) override
+		{
+		}
+	};
 
-    class NumericLiteralNode: public LiteralNode
-    {
-    public:
-        explicit NumericLiteralNode(int value): _value{ value }
-        {
-        }
-        
-        int GetValue() const
-        {
-            return _value;
-        }
+	class NumericLiteralNode : public LiteralNode
+	{
+	  public:
+		explicit NumericLiteralNode(int value) : _value{value}
+		{
+		}
 
-        void GenerateCode() override {}
-        void Accept(NodeVisitor* visitor) override;
+		int GetValue() const
+		{
+			return _value;
+		}
 
-    private:
-        int _value;
-    };
+		void GenerateCode() override
+		{
+		}
+		void Accept(NodeVisitor* visitor) override;
 
-    class StringLiteralNode: public LiteralNode
-    {
-    public:
-        explicit StringLiteralNode(std::string value): _value{ std::move(value) }
-        {
-        }
+	  private:
+		int _value;
+	};
 
-        std::string GetValue() const
-        {
-            return _value;
-        }
+	class StringLiteralNode : public LiteralNode
+	{
+	  public:
+		explicit StringLiteralNode(std::string value) : _value{std::move(value)}
+		{
+		}
 
-        void GenerateCode() override {}
-        void Accept(NodeVisitor* visitor) override;
+		std::string GetValue() const
+		{
+			return _value;
+		}
 
-    private:
-        std::string _value;
-    };
+		void GenerateCode() override
+		{
+		}
+		void Accept(NodeVisitor* visitor) override;
 
-    class BlockNode: public Node
-    {
-    public:
-        explicit BlockNode(std::vector<NodePtr>&& statements): _statements{ std::move(statements) }
-        {
-        }
+	  private:
+		std::string _value;
+	};
 
-        const std::vector<NodePtr>& GetStatements() const
-        {
-            return _statements;
-        }
+	class BlockNode : public Node
+	{
+	  public:
+		explicit BlockNode(std::vector<NodePtr>&& statements) : _statements{std::move(statements)}
+		{
+		}
 
-        void GenerateCode() override {}
-        void Accept(NodeVisitor* visitor) override;
-    private:
-        std::vector<NodePtr> _statements;
-    };
+		const std::vector<NodePtr>& GetStatements() const
+		{
+			return _statements;
+		}
 
-    class ProgramNode: public Node
-    {
-    public:
-        explicit ProgramNode(NodePtr name): _name{ std::move(name) }
-        {
-        }
+		void GenerateCode() override
+		{
+		}
+		void Accept(NodeVisitor* visitor) override;
 
-        void AddBlock(std::unique_ptr<BlockNode> block)
-        {
-            _blocks.push_back(std::move(block));
-        }
+	  private:
+		std::vector<NodePtr> _statements;
+	};
 
-        Node* GetName() const
-        {
-            return _name.get();
-        }
+	class ProgramNode : public Node
+	{
+	  public:
+		explicit ProgramNode(NodePtr name) : _name{std::move(name)}
+		{
+		}
 
-        const std::vector<std::unique_ptr<BlockNode>>& GetBlocks() const
-        {
-            return _blocks;
-        }
+		void AddBlock(std::unique_ptr<BlockNode> block)
+		{
+			_blocks.push_back(std::move(block));
+		}
 
-        void GenerateCode() override
-        {
-        }
+		Node* GetName() const
+		{
+			return _name.get();
+		}
 
-        void Accept(NodeVisitor* visitor) override;
+		const std::vector<std::unique_ptr<BlockNode>>& GetBlocks() const
+		{
+			return _blocks;
+		}
 
-    private:
-        NodePtr _name;
-        std::vector<std::unique_ptr<BlockNode>> _blocks;
-    };
+		void GenerateCode() override
+		{
+		}
 
-    enum class UnaryOperator: uint8_t
-    {
-        PLUS,
-        MINUS,
-        NOT,
-        COMPLEMENT
-    };
+		void Accept(NodeVisitor* visitor) override;
 
-    class UnaryNode: public ExpressionNode
-    {
-        explicit UnaryNode(ExpressionNodePtr node, UnaryOperator op):
-            _node{ std::move(node) },
-            _operator{ op }
-        {
-        }
+	  private:
+		NodePtr _name;
+		std::vector<std::unique_ptr<BlockNode>> _blocks;
+	};
 
-        Node* GetNode() const
-        {
-            return _node.get();
-        }
+	enum class UnaryOperator : uint8_t
+	{
+		PLUS,
+		MINUS,
+		NOT,
+		COMPLEMENT
+	};
 
-        UnaryOperator GetOperator() const
-        {
-            return _operator;
-        }
+	class UnaryNode : public ExpressionNode
+	{
+		explicit UnaryNode(ExpressionNodePtr node, UnaryOperator op) : _node{std::move(node)}, _operator{op}
+		{
+		}
 
-        void GenerateCode() override;
-        void Accept(NodeVisitor* visitor) override;
+		Node* GetNode() const
+		{
+			return _node.get();
+		}
 
-    private:
-        ExpressionNodePtr _node;
-        UnaryOperator _operator;
-    };
+		UnaryOperator GetOperator() const
+		{
+			return _operator;
+		}
 
-    enum class BinaryOperator: uint8_t
-    {
-        PLUS,
-        MINUS,
-        TIMES,
-        DIVIDE,
-        MODULO,
-        AND,
-        OR,
-        XOR,
-        ASSIGN,
-        LESS,
-        LESS_OR_EQUAL,
-        GREATER,
-        GREATER_OR_EQUAL,
-        EQUAL
-    };
+		void GenerateCode() override;
+		void Accept(NodeVisitor* visitor) override;
 
-    class BinaryNode: public ExpressionNode
-    {
-    public:
-        explicit BinaryNode(NodePtr left, NodePtr right, BinaryOperator op):
-            _left{ std::move(left)},
-            _right{ std::move(right) },
-            _operator{ op }
-        {
-        }
+	  private:
+		ExpressionNodePtr _node;
+		UnaryOperator _operator;
+	};
 
-        ~BinaryNode() = default;
+	enum class BinaryOperator : uint8_t
+	{
+		PLUS,
+		MINUS,
+		TIMES,
+		DIVIDE,
+		MODULO,
+		AND,
+		OR,
+		XOR,
+		ASSIGN,
+		LESS,
+		LESS_OR_EQUAL,
+		GREATER,
+		GREATER_OR_EQUAL,
+		EQUAL
+	};
 
-        static BinaryOperator GetBinaryOperator(Token token)
-        {
-            switch (token.getKind())
-            {
-                case Token::TokenKind::GREATER:
-                return BinaryOperator::GREATER;
-                case Token::TokenKind::GREATER_OR_EQUAL:
-                return BinaryOperator::GREATER_OR_EQUAL;
-                case Token::TokenKind::LESS:
-                return BinaryOperator::LESS;
-                case Token::TokenKind::LESS_OR_EQUAL:
-                return BinaryOperator::LESS_OR_EQUAL;
-                case Token::TokenKind::EQUAL:
-                return BinaryOperator::EQUAL;
-            }
-        }
+	class BinaryNode : public ExpressionNode
+	{
+	  public:
+		explicit BinaryNode(NodePtr left, NodePtr right, BinaryOperator op)
+			: _left{std::move(left)}, _right{std::move(right)}, _operator{op}
+		{
+		}
 
-        Node* GetLHS() const
-        {
-            return _left.get();
-        }
+		~BinaryNode() = default;
 
-        Node* GetRHS() const
-        {
-            return _right.get();
-        }
+		static BinaryOperator GetBinaryOperator(Token token)
+		{
+			switch (token.getKind())
+			{
+			case Token::TokenKind::GREATER:
+				return BinaryOperator::GREATER;
+			case Token::TokenKind::GREATER_OR_EQUAL:
+				return BinaryOperator::GREATER_OR_EQUAL;
+			case Token::TokenKind::LESS:
+				return BinaryOperator::LESS;
+			case Token::TokenKind::LESS_OR_EQUAL:
+				return BinaryOperator::LESS_OR_EQUAL;
+			case Token::TokenKind::EQUAL:
+				return BinaryOperator::EQUAL;
+			}
+		}
 
-        BinaryOperator GetOperator() const
-        {
-            return _operator;
-        }
+		Node* GetLHS() const
+		{
+			return _left.get();
+		}
 
-        void GenerateCode() override {}
-        void Accept(NodeVisitor* visitor) override;
+		Node* GetRHS() const
+		{
+			return _right.get();
+		}
 
-    private:
-        NodePtr _left;
-        NodePtr _right;
-        BinaryOperator _operator;
-    };
+		BinaryOperator GetOperator() const
+		{
+			return _operator;
+		}
 
-    class ComparisonNode: public Node
-    {
-    public:
-        explicit ComparisonNode(std::unique_ptr<BinaryNode> condition, std::unique_ptr<BlockNode> block): _condition{ std::move(condition) }, _block{ std::move(block) }
-        {
-        }
+		void GenerateCode() override
+		{
+		}
+		void Accept(NodeVisitor* visitor) override;
 
-        BinaryNode* GetCondition() const
-        {
-            return _condition.get();
-        }
+	  private:
+		NodePtr _left;
+		NodePtr _right;
+		BinaryOperator _operator;
+	};
 
-        BlockNode* GetBlock() const
-        {
-            return _block.get();
-        }
+	class ComparisonNode : public Node
+	{
+	  public:
+		explicit ComparisonNode(std::unique_ptr<BinaryNode> condition, std::unique_ptr<BlockNode> block)
+			: _condition{std::move(condition)}, _block{std::move(block)}
+		{
+		}
 
-        void GenerateCode() override
-        {
-        }
+		BinaryNode* GetCondition() const
+		{
+			return _condition.get();
+		}
 
-        void Accept(NodeVisitor* visitor) override;
-    private:
-        std::unique_ptr<BinaryNode> _condition;
-        std::unique_ptr<BlockNode> _block;
-    };
-}
+		BlockNode* GetBlock() const
+		{
+			return _block.get();
+		}
+
+		void GenerateCode() override
+		{
+		}
+
+		void Accept(NodeVisitor* visitor) override;
+
+	  private:
+		std::unique_ptr<BinaryNode> _condition;
+		std::unique_ptr<BlockNode> _block;
+	};
+} // namespace compiler
 
 #endif

@@ -1,0 +1,13 @@
+BasedOnStyle: LLVM
+IndentWidth: 4
+UseTab: AlignWithSpaces
+TabWidth: 4
+Language: Cpp
+ColumnLimit: 120
+PointerAlignment: Left
+BreakBeforeBraces: Allman
+AllowAllConstructorInitializersOnNextLine: true
+AllowShortBlocksOnASingleLine: Never
+AllowShortIfStatementsOnASingleLine: false
+AllowShortFunctionsOnASingleLine: None
+NamespaceIndentation: All

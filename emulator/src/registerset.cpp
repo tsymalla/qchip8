@@ -5,11 +5,11 @@ namespace Chip8
 	void RegisterSet::reset()
 	{
 		_baseRegisters.fill(0x00);
-		_addressRegister = { 0x0000 };
-		_delayTimer = { 0x00 };
-		_soundTimer = { 0x00 };
+		_addressRegister = {0x0000};
+		_delayTimer = {0x00};
+		_soundTimer = {0x00};
 		_stack.fill(0x0000);
-		_stackPointer = { 0x0000 };
+		_stackPointer = {0x0000};
 	}
 
 	void RegisterSet::pushStack(Word value)
@@ -106,4 +106,4 @@ namespace Chip8
 	{
 		return _soundTimer;
 	}
-}
+} // namespace Chip8

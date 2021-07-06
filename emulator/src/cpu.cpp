@@ -28,12 +28,12 @@ namespace Chip8
 		_isRunning = false;
 		_canRefreshScreen = false;
 		_registerSet.reset();
-		_programCounter = { 0x0200 };
-		_opcode = { 0x0000 };
-		_framebuffer.fill({ 0x00 });
-		_keyStatus.fill({ false });
+		_programCounter = {0x0200};
+		_opcode = {0x0000};
+		_framebuffer.fill({0x00});
+		_keyStatus.fill({false});
 
-        _is = new IS(_programCounter, _registerSet, _memory, _framebuffer, _keyStatus, this);
+		_is = new IS(_programCounter, _registerSet, _memory, _framebuffer, _keyStatus, this);
 	}
 
 	void CPU::reset()
@@ -116,4 +116,4 @@ namespace Chip8
 		_decode();
 		_execute();
 	}
-}
+} // namespace Chip8

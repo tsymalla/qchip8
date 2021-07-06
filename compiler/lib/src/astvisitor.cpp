@@ -1,44 +1,41 @@
-#include <astvisitor.hpp>
 #include <ast.hpp>
+#include <astvisitor.hpp>
 
 namespace compiler
 {
-    void PrintNodeVisitor::VisitProgram(ProgramNode* node)
-    {
-        VisitString(dynamic_cast<StringLiteralNode*>(node->GetName()));
+	void PrintNodeVisitor::VisitProgram(ProgramNode* node)
+	{
+		VisitString(dynamic_cast<StringLiteralNode*>(node->GetName()));
 
-        for (const auto& block : node->GetBlocks())
-        {
-            VisitBlock(block.get());
-        }
-    }
+		for (const auto& block : node->GetBlocks())
+		{
+			VisitBlock(block.get());
+		}
+	}
 
-    void PrintNodeVisitor::VisitBlock(BlockNode* node)
-    {
-    }
+	void PrintNodeVisitor::VisitBlock(BlockNode* node)
+	{
+	}
 
-    void PrintNodeVisitor::VisitString(StringLiteralNode* node)
-    {
-        std::cout << "String: " << node->GetValue() << std::endl;
-    }
+	void PrintNodeVisitor::VisitString(StringLiteralNode* node)
+	{
+		std::cout << "String: " << node->GetValue() << std::endl;
+	}
 
-    void PrintNodeVisitor::VisitNumeric(NumericLiteralNode* node)
-    {
-        std::cout << "Numeric: " << node->GetValue() << std::endl;
-    }
+	void PrintNodeVisitor::VisitNumeric(NumericLiteralNode* node)
+	{
+		std::cout << "Numeric: " << node->GetValue() << std::endl;
+	}
 
-    void PrintNodeVisitor::VisitUnary(UnaryNode* node)
-    {
-    	
-    }
-	
-    void PrintNodeVisitor::VisitBinary(BinaryNode* node)
-    {
-	    
-    }
-	
-    void PrintNodeVisitor::VisitComparison(ComparisonNode* node)
-    {
-	    
-    }
-}
+	void PrintNodeVisitor::VisitUnary(UnaryNode* node)
+	{
+	}
+
+	void PrintNodeVisitor::VisitBinary(BinaryNode* node)
+	{
+	}
+
+	void PrintNodeVisitor::VisitComparison(ComparisonNode* node)
+	{
+	}
+} // namespace compiler

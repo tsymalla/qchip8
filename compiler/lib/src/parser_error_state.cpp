@@ -2,7 +2,7 @@
 
 namespace compiler
 {
-	ParseError::ParseError(PARSE_ERROR_TYPE type): _type{ type }
+	ParseError::ParseError(PARSE_ERROR_TYPE type) : _type{type}
 	{
 	}
 
@@ -53,17 +53,17 @@ namespace compiler
 	void ParserErrorState::HandleUnexpectedToken(const Token& token, Token::TokenKind tokenKind,
 	                                             std::string_view lexeme)
 	{
-		ParseError err{ PARSE_ERROR_TYPE::UNEXPECTED_TOKEN };
+		ParseError err{PARSE_ERROR_TYPE::UNEXPECTED_TOKEN};
 		err.SetToken(token);
 		err.SetExpectedTokenKind(tokenKind);
 		err.SetLexeme(lexeme);
-		
+
 		_errorData.emplace_back(std::move(err));
 	}
 
 	void ParserErrorState::HandleEndOfInput(Token::TokenKind tokenKind, std::string_view lexeme)
 	{
-		ParseError err{ PARSE_ERROR_TYPE::UNEXPECTED_TOKEN };
+		ParseError err{PARSE_ERROR_TYPE::UNEXPECTED_TOKEN};
 		err.SetExpectedTokenKind(tokenKind);
 		err.SetLexeme(lexeme);
 
@@ -88,4 +88,4 @@ namespace compiler
 
 		out.flush();
 	}
-}
+} // namespace compiler

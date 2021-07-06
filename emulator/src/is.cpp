@@ -4,13 +4,10 @@
 
 namespace Chip8
 {
-	IS::IS(Word& programCounter, RegisterSet& registerSet, Memory& memory, FrameBuffer& framebuffer, KeyBuffer& keybuffer, QObject* parent) :
-		QObject(parent),
-		_programCounter(programCounter),
-		_registerSet(registerSet),
-		_memory(memory),
-		_framebuffer(framebuffer),
-		_keybuffer(keybuffer)
+	IS::IS(Word& programCounter, RegisterSet& registerSet, Memory& memory, FrameBuffer& framebuffer,
+	       KeyBuffer& keybuffer, QObject* parent)
+		: QObject(parent), _programCounter(programCounter), _registerSet(registerSet), _memory(memory),
+		  _framebuffer(framebuffer), _keybuffer(keybuffer)
 	{
 	}
 
@@ -24,16 +21,9 @@ namespace Chip8
 		const Byte nn = opcode & 0x00FF;
 		const Byte n = opcode & 0x000F;
 
-		qDebug() << QString::number(_programCounter, 16) << "\t" << QString::number(opcode, 16) << "\t"
-			<< registerX
-			<< "\t"
-			<< registerY
-			<< "\t"
-			<< QString::number(nnn, 16)
-			<< "\t"
-			<< QString::number(nn, 16)
-			<< "\t"
-			<< QString::number(n, 16);
+		qDebug() << QString::number(_programCounter, 16) << "\t" << QString::number(opcode, 16) << "\t" << registerX
+				 << "\t" << registerY << "\t" << QString::number(nnn, 16) << "\t" << QString::number(nn, 16) << "\t"
+				 << QString::number(n, 16);
 
 		switch (opcode & 0xF000)
 		{
@@ -138,21 +128,24 @@ namespace Chip8
 			}
 			case 0x0001:
 			{
-				_registerSet.setRegisterValue(registerX, _registerSet.getRegisterValue(registerX) | _registerSet.getRegisterValue(registerY));
+				_registerSet.setRegisterValue(registerX, _registerSet.getRegisterValue(registerX) |
+				                                             _registerSet.getRegisterValue(registerY));
 				_stepProgramCounterByte();
 
 				break;
 			}
 			case 0x0002:
 			{
-				_registerSet.setRegisterValue(registerX, _registerSet.getRegisterValue(registerX) & _registerSet.getRegisterValue(registerY));
+				_registerSet.setRegisterValue(registerX, _registerSet.getRegisterValue(registerX) &
+				                                             _registerSet.getRegisterValue(registerY));
 				_stepProgramCounterByte();
 
 				break;
 			}
 			case 0x0003:
 			{
-				_registerSet.setRegisterValue(registerX, _registerSet.getRegisterValue(registerX) ^ _registerSet.getRegisterValue(registerY));
+				_registerSet.setRegisterValue(registerX, _registerSet.getRegisterValue(registerX) ^
+				                                             _registerSet.getRegisterValue(registerY));
 				_stepProgramCounterByte();
 
 				break;
@@ -208,7 +201,8 @@ namespace Chip8
 					_registerSet.setRegisterValue(0xF, 1);
 				}
 
-				_registerSet.setRegisterValue(registerX, _registerSet.getRegisterValue(registerY) - _registerSet.getRegisterValue(registerX));
+				_registerSet.setRegisterValue(registerX, _registerSet.getRegisterValue(registerY) -
+				                                             _registerSet.getRegisterValue(registerX));
 				_stepProgramCounterByte();
 
 				break;
@@ -437,7 +431,7 @@ namespace Chip8
 			break;
 		}
 		default:
-			//qDebug().noquote() << "Invalid opcode: " << QString::number(opcode, 16);
+			// qDebug().noquote() << "Invalid opcode: " << QString::number(opcode, 16);
 			break;
 		}
 
@@ -448,4 +442,4 @@ namespace Chip8
 	{
 		_programCounter += 2;
 	}
-}
+} // namespace Chip8

@@ -1,15 +1,15 @@
 #ifndef EMULATORWORKER_H
 #define EMULATORWORKER_H
 
-#include <QObject>
 #include "cpu.h"
 #include <QMutex>
+#include <QObject>
 
 class EmulatorWorker : public QObject
 {
 	Q_OBJECT
 
-public:
+  public:
 	explicit EmulatorWorker(QObject* parent = nullptr);
 	void setROM(QString filename);
 	void keyDown(int key);
@@ -17,16 +17,16 @@ public:
 
 	bool isRunning() const;
 
-public slots:
+  public slots:
 	void onRunEmulation();
 	void onStopEmulation();
 	void onRefreshScreen(Chip8::FrameBuffer framebuffer);
 
-signals:
+  signals:
 	void refreshScreen(Chip8::FrameBuffer framebuffer);
 	void finishedEmulation();
 
-private:
+  private:
 	Chip8::CPU _emulator;
 	QMutex _mutex;
 };

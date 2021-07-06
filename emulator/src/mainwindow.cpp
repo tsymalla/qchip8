@@ -5,21 +5,18 @@
 #include <QKeyEvent>
 
 MainWindow::MainWindow(QWidget* parent)
-	: QMainWindow(parent)
-	, ui(new Ui::MainWindow),
-	_emulatorThread(nullptr),
-    _emulatorWorker(nullptr)
+	: QMainWindow(parent), ui(new Ui::MainWindow), _emulatorThread(nullptr), _emulatorWorker(nullptr)
 {
 	ui->setupUi(this);
 
-    _editorWindow = new EditorWindow(this);
+	_editorWindow = new EditorWindow(this);
 }
 
 MainWindow::~MainWindow()
 {
 	if (_emulatorWorker != nullptr)
 	{
-		emit stopEmulation();// _emulatorWorker->stopEmulation();
+		emit stopEmulation(); // _emulatorWorker->stopEmulation();
 	}
 
 	if (_emulatorThread != nullptr)
@@ -61,7 +58,8 @@ void MainWindow::on_action_Exit_triggered()
 
 void MainWindow::on_action_Load_ROM_triggered()
 {
-	const QString& filename = QFileDialog::getOpenFileName(this, tr("Select ROM file"), QDir::homePath(), tr("ROM files (*.ch8 *.bin)"));
+	const QString& filename =
+		QFileDialog::getOpenFileName(this, tr("Select ROM file"), QDir::homePath(), tr("ROM files (*.ch8 *.bin)"));
 	if (filename.isEmpty())
 	{
 		return;
@@ -140,9 +138,9 @@ bool MainWindow::_isRunning() const
 
 void MainWindow::on_action_About_triggered()
 {
-	QMessageBox::information(this,
-		"About qchip8",
-		"A Qt- and C++ 17-based, multi-threaded emulator.\n\nWritten by Thomas Symalla in 2020.\nhttps://github.com/tsymalla/qchip8");
+	QMessageBox::information(this, "About qchip8",
+	                         "A Qt- and C++ 17-based, multi-threaded emulator.\n\nWritten by Thomas Symalla in "
+	                         "2020.\nhttps://github.com/tsymalla/qchip8");
 }
 
 void MainWindow::on_action_Start_emulation_triggered()
@@ -163,22 +161,23 @@ void MainWindow::on_actionTake_screenshot_triggered()
 	// copy the current buffer
 	QImage currentBuffer = _framebuffer;
 
-	const auto file = QFileDialog::getSaveFileName(this, "Select file", QDir::homePath(), "Image files (*.png *.jpg *.bmp)");
+	const auto file =
+		QFileDialog::getSaveFileName(this, "Select file", QDir::homePath(), "Image files (*.png *.jpg *.bmp)");
 
-    if (!file.isEmpty())
-    {
-        if (currentBuffer.save(file))
-        {
-            QMessageBox::information(this, "Success", QString("The screenshot was taken and saved to %1.").arg(file));
-        }
-        else
-        {
-            QMessageBox::warning(this, "Failure", QString("Could not save to %1.").arg(file));
-        }
-    }
+	if (!file.isEmpty())
+	{
+		if (currentBuffer.save(file))
+		{
+			QMessageBox::information(this, "Success", QString("The screenshot was taken and saved to %1.").arg(file));
+		}
+		else
+		{
+			QMessageBox::warning(this, "Failure", QString("Could not save to %1.").arg(file));
+		}
+	}
 }
 
 void MainWindow::on_actionCreate_new_ROM_triggered()
 {
-    _editorWindow->show();
+	_editorWindow->show();
 }

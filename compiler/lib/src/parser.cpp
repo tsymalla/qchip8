@@ -1,9 +1,9 @@
-#include <parser.hpp>
 #include <iostream>
+#include <parser.hpp>
 
 namespace compiler
 {
-	Parser::Parser(const std::vector<Token>& tokens) : _tokenIndex{ -1 }, _tokens{ tokens }
+	Parser::Parser(const std::vector<Token>& tokens) : _tokenIndex{-1}, _tokens{tokens}
 	{
 		if (!_tokens.empty())
 		{
@@ -93,7 +93,8 @@ namespace compiler
 		++_tokenIndex;
 	}
 
-	Token Parser::_expect(Token::TokenKind tokenKind) {
+	Token Parser::_expect(Token::TokenKind tokenKind)
+	{
 		Token nextToken = _peek();
 
 		if (nextToken.getKind() == tokenKind)
@@ -244,8 +245,7 @@ namespace compiler
 	//
 	std::unique_ptr<BinaryNode> Parser::_parseIf()
 	{
-		if (_match(Token::TokenKind::KEYWORD, "if") &&
-			_match(Token::TokenKind::OPEN_PARENTHESIS))
+		if (_match(Token::TokenKind::KEYWORD, "if") && _match(Token::TokenKind::OPEN_PARENTHESIS))
 		{
 			if (auto expression = _parseCondition(); expression && _match(Token::TokenKind::CLOSE_PARENTHESIS))
 			{
@@ -268,7 +268,8 @@ namespace compiler
 				_advance();
 				if (auto value = _getNumericLiteral(); value)
 				{
-					return std::make_unique<BinaryNode>(std::move(id), std::move(value), BinaryNode::GetBinaryOperator(op));
+					return std::make_unique<BinaryNode>(std::move(id), std::move(value),
+					                                    BinaryNode::GetBinaryOperator(op));
 				}
 			}
 		}
@@ -281,8 +282,7 @@ namespace compiler
 	//
 	NodePtr Parser::_parseLoop()
 	{
-		if (_match(Token::TokenKind::KEYWORD, "while") &&
-			_match(Token::TokenKind::OPEN_PARENTHESIS))
+		if (_match(Token::TokenKind::KEYWORD, "while") && _match(Token::TokenKind::OPEN_PARENTHESIS))
 		{
 			auto condition = _parseCondition();
 			if (_match(Token::TokenKind::CLOSE_PARENTHESIS))
@@ -299,4 +299,4 @@ namespace compiler
 	{
 		return nullptr;
 	}
-}
+} // namespace compiler

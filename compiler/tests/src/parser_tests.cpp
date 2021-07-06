@@ -1,9 +1,9 @@
 #define CATCH_CONFIG_RUNNER
 #include <catch2/catch2.hpp>
 
+#include <iostream>
 #include <lexer.hpp>
 #include <parser.hpp>
-#include <iostream>
 
 using compiler::Token;
 

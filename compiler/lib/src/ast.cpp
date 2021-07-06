@@ -36,4 +36,4 @@ namespace compiler
 	{
 		visitor->VisitComparison(this);
 	}
-}
+} // namespace compiler
