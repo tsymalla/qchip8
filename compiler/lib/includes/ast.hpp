@@ -240,6 +240,41 @@ namespace compiler
 			}
 		}
 
+		static const char* BinaryOperatorToString(BinaryOperator op)
+		{
+			switch (op)
+			{
+			case BinaryOperator::AND:
+				return "&";
+			case BinaryOperator::ASSIGN:
+				return "=";
+			case BinaryOperator::DIVIDE:
+				return "/";
+			case BinaryOperator::EQUAL:
+				return "==";
+			case BinaryOperator::GREATER:
+				return ">";
+			case BinaryOperator::GREATER_OR_EQUAL:
+				return ">=";
+			case BinaryOperator::LESS:
+				return "<";
+			case BinaryOperator::LESS_OR_EQUAL:
+				return "<=";
+			case BinaryOperator::MINUS:
+				return "-";
+			case BinaryOperator::MODULO:
+				return "%";
+			case BinaryOperator::OR:
+				return "|";
+			case BinaryOperator::PLUS:
+				return "+";
+			case BinaryOperator::TIMES:
+				return "*";
+			case BinaryOperator::XOR:
+				return "^";
+			}
+		}
+
 		Node* GetLHS() const
 		{
 			return _left.get();
@@ -258,6 +293,7 @@ namespace compiler
 		void GenerateCode() override
 		{
 		}
+		
 		void Accept(NodeVisitor* visitor) override;
 
 	  private:
